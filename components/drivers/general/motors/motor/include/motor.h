@@ -9,6 +9,7 @@
 #include "esp_log.h"
 
 #include "rotary_encoder.h"
+#include "pid_controller.h"
 #include "driver/ledc.h"
 #include "driver/gpio.h"
 
