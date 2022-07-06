@@ -10,8 +10,6 @@
 
 #include "freertos/FreeRTOS.h"
 
-
-
 typedef struct
 {
     int16_t bias;      //偏差
@@ -23,13 +21,22 @@ typedef struct
 
 typedef struct
 {
-    int16_t p;
-    int16_t i;
-    int16_t d;
+    int16_t kp;
+    int16_t ki;
+    int16_t kd;
     int16_t limit;               //输出限制
     int16_t target;              //目标值
+    int16_t output;              //目标值
     pid_calculate_t pid_calcute; // 用于计算的结构体
-} pid_config_t;
+} pid_controller_t;
+
+#define PID_CONTROLLER(kp, ki, kd, limit) \
+    {                                     \
+        .kp = kp,                         \
+        .ki = ki,                         \
+        .kd = kd,                         \
+        .limit = limit,                   \
+    }
 
 /**
  * @brief 更新PID数值
@@ -39,6 +46,6 @@ typedef struct
  * @param current 当前值
  * @return uint16_t 系统输出
  */
-uint16_t pid_update(pid_config_t *pid_config, int16_t target, int16_t current);
+int16_t pid_update(pid_controller_t *pid_config, int16_t target, int16_t current);
 
 #endif // _PID_H_

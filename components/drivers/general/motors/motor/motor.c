@@ -25,12 +25,19 @@ static motor_config_t motor_config[] = {
      .io_encoder_positive = 25,
      .io_encoder_negative = 26},
 };
+
+
+// static pid_controller_t pid_controller[] = {
+//     PID_CONTROLLER(300, 0, 200, 8000),
+//     PID_CONTROLLER(300, 0, 200, 8000)
+// };
+
 static rotary_encoder_t *rotary_encoder[MOTOR_NUM];
 static uint8_t ledc_channel_map[MOTOR_NUM] = {LEDC_CHANNEL_0, LEDC_CHANNEL_1};
 
 bool motor_config_init()
 {
-    // TODO 小鱼(read config from nvs)
+    // TODO 小鱼(read pid\io_config from nvs)
     return true;
 }
 
@@ -70,7 +77,7 @@ bool motor_init(void)
         ledc_channel_config_t ledc_channel = {
             .channel = ledc_channel_map[motor_config[i].motor_id],
             .duty = 0,
-            .gpio_num =  motor_config[i].io_pwm,
+            .gpio_num = motor_config[i].io_pwm,
             .speed_mode = LEDC_HIGH_SPEED_MODE,
             .hpoint = 0,
             .timer_sel = LEDC_TIMER_0,
@@ -79,23 +86,26 @@ bool motor_init(void)
         // pid 配置初始化
     }
 
-
-
     return true;
 }
-
 
 static void motor_task(void *param)
 {
     uint8_t i;
+    // float spped_left, spped_right = 0;
+    // int32_t last_time_mm = xTaskGetTickCount();
+
     while (1)
     {
         for (i = 0; i < MOTOR_NUM; i++)
         {
             // update ecoder
             int32_t tick = rotary_encoder[motor_config[i].motor_id]->get_counter_value(rotary_encoder[motor_config[i].motor_id]);
-            // update pid
             ESP_LOGI(FISHBOT_MODLUE, "tick %d:%d", motor_config[i].motor_id, tick);
+            // last_time_mm =
+            // calcute speed
+            UPDATE_OUTPUT(i, 2000);
+            // update pid
             // update output
             vTaskDelay(pdMS_TO_TICKS(20));
         }
@@ -103,15 +113,14 @@ static void motor_task(void *param)
     vTaskDelete(NULL);
 }
 
-
 /**
  * @brief 电机控制任务
  *
  * @param param
  */
 void motor_task_init()
-{   
-    xTaskCreate(motor_task, "motor_task", 5  * 1024, NULL, 5, NULL);
+{
+    xTaskCreate(motor_task, "motor_task", 5 * 1024, NULL, 5, NULL);
 }
 
 // static void rotary_task(void *arg)
