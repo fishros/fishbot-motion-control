@@ -10,7 +10,6 @@
 
 #include "esp_log.h"
 
-
 #define LED_POL_POS 0
 #define LED_POL_NEG 1
 

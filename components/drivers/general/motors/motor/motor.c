@@ -26,12 +26,6 @@ static motor_config_t motor_config[] = {
      .io_encoder_negative = 26},
 };
 
-
-// static pid_controller_t pid_controller[] = {
-//     PID_CONTROLLER(300, 0, 200, 8000),
-//     PID_CONTROLLER(300, 0, 200, 8000)
-// };
-
 static rotary_encoder_t *rotary_encoder[MOTOR_NUM];
 static uint8_t ledc_channel_map[MOTOR_NUM] = {LEDC_CHANNEL_0, LEDC_CHANNEL_1};
 
@@ -102,7 +96,6 @@ static void motor_task(void *param)
             // update ecoder
             int32_t tick = rotary_encoder[motor_config[i].motor_id]->get_counter_value(rotary_encoder[motor_config[i].motor_id]);
             ESP_LOGI(FISHBOT_MODLUE, "tick %d:%d", motor_config[i].motor_id, tick);
-            // last_time_mm =
             // calcute speed
             UPDATE_OUTPUT(i, 2000);
             // update pid
@@ -122,85 +115,3 @@ void motor_task_init()
 {
     xTaskCreate(motor_task, "motor_task", 5 * 1024, NULL, 5, NULL);
 }
-
-// static void rotary_task(void *arg)
-// {
-
-//     int32_t tick_left = encoder_left->get_counter_value(encoder_left);
-//     int32_t tick_right = encoder_right->get_counter_value(encoder_right);
-
-//     // pid 结构体初始化
-//     my_pid_t pid_left, pid_right;
-
-//     // // 速度以及速度计算所需变量
-//     float spped_left, spped_right = 0;
-//     int32_t tick_count = xTaskGetTickCount();
-//     int16_t time_spend = 0;
-
-//     motor frame = {
-//         .START = 0x7D,
-//         .TARGET = 0x01,
-//         .CODE = 0X01,
-//         .data_len = 0x04,
-//         .END = 0x7E,
-//     };
-
-//     while (1)
-//     {
-//         //花费的时间
-//         time_spend = (xTaskGetTickCount() - tick_count);
-//         //计算左右轮速度
-//         spped_left = encoder_left->get_counter_value(encoder_left) - tick_left;
-//         spped_left = (float)spped_left / tick_per_merter / time_spend * 100;
-//         spped_right = encoder_right->get_counter_value(encoder_right) - tick_right;
-//         spped_right = (float)spped_right / tick_per_merter / time_spend * 100;
-
-//         // ESP_LOGI(TAG,"tick_left:%d spped_left:%f ", encoder_left->get_counter_value(encoder_left) - tick_left,spped_left);
-//         // 更新tick_count 和 tick
-//         tick_count = xTaskGetTickCount();
-//         tick_left = encoder_left->get_counter_value(encoder_left);
-//         tick_right = encoder_right->get_counter_value(encoder_right);
-
-//         pid_update(&pid_left, target_spped_left, (int)spped_left);
-//         if (pid_left.output >= 0)
-//         {
-//             gpio_set_level(GPIO_OUTPUT_IO_LEFT_0, 1);
-//             gpio_set_level(GPIO_OUTPUT_IO_LEFT_1, 0);
-//             ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, pid_left.output);
-//         }
-//         else
-//         {
-//             gpio_set_level(GPIO_OUTPUT_IO_LEFT_0, 0);
-//             gpio_set_level(GPIO_OUTPUT_IO_LEFT_1, 1);
-//             ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, -pid_left.output);
-//         }
-//         ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0);
-
-//         pid_update(&pid_right, target_spped_right, (int)spped_right);
-//         if (pid_right.output >= 0)
-//         {
-//             gpio_set_level(GPIO_OUTPUT_IO_RIGHT_0, 1);
-//             gpio_set_level(GPIO_OUTPUT_IO_RIGHT_1, 0);
-//             ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, pid_right.output);
-//         }
-//         else
-//         {
-//             gpio_set_level(GPIO_OUTPUT_IO_RIGHT_0, 0);
-//             gpio_set_level(GPIO_OUTPUT_IO_RIGHT_1, 1);
-//             ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, -pid_right.output);
-//         }
-//         ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1);
-
-//         ESP_LOGI(TAG, "speed_left:%f->%d  duty_left:%d", spped_left, target_spped_left, pid_left.output);
-//         ESP_LOGI(TAG, "speed_right:%f->%d  duty_right:%d", spped_right, target_spped_right, pid_right.output);
-
-//         // 更新速度并发送
-//         frame.spped_left = spped_left;
-//         frame.spped_right = spped_right;
-//         frame.sum = calc_checksum((char *)&frame + 4, frame.data_len);
-//         send_data((char *)&frame, sizeof(frame));
-
-//         vTaskDelay(pdMS_TO_TICKS(33));
-//     }
-//     vTaskDelete(NULL);
-// }

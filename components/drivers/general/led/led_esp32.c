@@ -90,7 +90,6 @@ static void led_task(void *param)
         led_test();
         ESP_LOGI(FISHBOT_MODLUE, "led task runing..");
     }
-    
 }
 
 void led_task_init(void)

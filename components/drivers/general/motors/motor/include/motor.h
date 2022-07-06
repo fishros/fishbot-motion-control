@@ -15,7 +15,6 @@
 
 #define MOTOR_NUM 2
 
-
 typedef struct
 {
     uint8_t motor_id;
@@ -49,4 +48,4 @@ bool motor_config_init(void);
  */
 void motor_task_init();
 
-#endif
+#endif // _MOTOR_H_

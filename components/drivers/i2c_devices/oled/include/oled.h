@@ -1,5 +1,5 @@
-#ifndef __OLED_H__
-#define __OLED_H__
+#ifndef _OLED_H_
+#define _OLED_H_
 
 #include <stdio.h>
 #include <string.h>
