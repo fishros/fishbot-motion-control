@@ -11,7 +11,7 @@
  * @brief MPU6050 library for ESP32 ESP-IDF.
  */
 
-#include "mpu6050/mpu6050.h"
+#include "mpu6050.h"
 #include <string.h>
 
 const char *TAG_MPU6050 = "MPU6050";

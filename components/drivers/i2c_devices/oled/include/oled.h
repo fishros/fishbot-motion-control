@@ -46,7 +46,11 @@ void oled_clear(void);
 
 /**
  * @brief 设置坐标
- *
+ * 0-----------128>x
+ * |
+ * |
+ * 8
+ * y
  * @param x
  * @param y
  */

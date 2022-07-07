@@ -13,6 +13,7 @@
 #include "pid_controller.h"
 #include "rotary_encoder.h"
 #include "oled.h"
+#include "mpu6050.h"
 
 #define FISHBOT_SOFTWARE_VERSION_STRING_MAX_LEN (32 + 1)
 #define FISHBOT_HARDWARE_VERSION_STRING_MAX_LEN (32 + 1)

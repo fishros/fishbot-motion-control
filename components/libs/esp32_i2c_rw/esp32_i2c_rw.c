@@ -18,6 +18,11 @@
 #include "esp32_i2c_rw.h"
 
 #define I2C_NUM (I2C_NUM_0)
+#define I2C_MASTER_FREQ_HZ          400000                     /*!< I2C master clock frequency */
+#define I2C_MASTER_NUM              0                          /*!< I2C master i2c port number, the number of i2c peripheral interfaces available will depend on the chip */
+#define I2C_MASTER_TX_BUF_DISABLE   0                          /*!< I2C master doesn't need buffer */
+#define I2C_MASTER_RX_BUF_DISABLE   0                          /*!< I2C master doesn't need buffer */
+#define I2C_MASTER_TIMEOUT_MS       1000
 
 static i2c_device_config_t *i2c_device_config_;
 
@@ -29,15 +34,30 @@ bool set_i2c_device_config(i2c_device_config_t *i2c_device_config)
 
 bool i2c_device_init(void)
 {
-	int i2c_master_port = i2c_device_config_->i2c_num;
-	i2c_config_t conf;
-	conf.mode = I2C_MODE_MASTER;
-	conf.sda_io_num = i2c_device_config_->sda_pin;
-	conf.sda_pullup_en = 0;
-	conf.scl_io_num = i2c_device_config_->scl_pin;
-	conf.scl_pullup_en = 0;
-	ESP_ERROR_CHECK(i2c_driver_install(i2c_master_port, conf.mode, 0, 0, 0));
-	ESP_ERROR_CHECK(i2c_param_config(i2c_master_port, &conf));
+	// int i2c_master_port = i2c_device_config_->i2c_num;
+	// i2c_config_t conf;
+	// conf.mode = I2C_MODE_MASTER;
+	// conf.sda_io_num = i2c_device_config_->sda_pin;
+	// conf.sda_pullup_en = 0;
+	// conf.scl_io_num = i2c_device_config_->scl_pin;
+	// conf.scl_pullup_en = 0;
+	// conf.master.clk_speed = I2C_MASTER_FREQ_HZ;
+	// ESP_ERROR_CHECK(i2c_driver_install(i2c_master_port, conf.mode, 0, 0, 0));
+	// ESP_ERROR_CHECK(i2c_param_config(i2c_master_port, &conf));
+
+	int i2c_master_port = 0;
+
+    i2c_config_t conf = {
+        .mode = I2C_MODE_MASTER,
+        .sda_io_num = i2c_device_config_->sda_pin,
+        .scl_io_num = i2c_device_config_->scl_pin,
+        .sda_pullup_en = 0,
+        .scl_pullup_en = 0,
+        .master.clk_speed = I2C_MASTER_FREQ_HZ,
+    };
+
+    i2c_param_config(i2c_master_port, &conf);
+    i2c_driver_install(i2c_master_port, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0);
 	return true;
 }
 
@@ -48,7 +68,7 @@ void select_register(uint8_t device_address, uint8_t register_address)
 	i2c_master_write_byte(cmd, (device_address << 1) | I2C_MASTER_WRITE, 1);
 	i2c_master_write_byte(cmd, register_address, 1);
 	i2c_master_stop(cmd);
-	i2c_master_cmd_begin(I2C_NUM, cmd, 1000 / portTICK_PERIOD_MS);
+	i2c_master_cmd_begin(i2c_device_config_->i2c_num, cmd, 1000 / portTICK_PERIOD_MS);
 	i2c_cmd_link_delete(cmd);
 }
 
@@ -69,7 +89,7 @@ int8_t esp32_i2c_read_bytes(
 	i2c_master_read_byte(cmd, data + size - 1, 1);
 
 	i2c_master_stop(cmd);
-	i2c_master_cmd_begin(I2C_NUM, cmd, 1000 / portTICK_PERIOD_MS);
+	i2c_master_cmd_begin(i2c_device_config_->i2c_num, cmd, 1000 / portTICK_PERIOD_MS);
 	i2c_cmd_link_delete(cmd);
 
 	return (size);
@@ -132,7 +152,7 @@ bool esp32_i2c_write_bytes(
 	i2c_master_write(cmd, data, size - 1, 0);
 	i2c_master_write_byte(cmd, data[size - 1], 1);
 	i2c_master_stop(cmd);
-	i2c_master_cmd_begin(I2C_NUM, cmd, 1000 / portTICK_PERIOD_MS);
+	i2c_master_cmd_begin(i2c_device_config_->i2c_num, cmd, 1000 / portTICK_PERIOD_MS);
 	i2c_cmd_link_delete(cmd);
 
 	return (true);
@@ -149,7 +169,7 @@ bool esp32_i2c_write_byte(
 	i2c_master_write_byte(cmd, register_address, 1);
 	i2c_master_write_byte(cmd, data, 1);
 	i2c_master_stop(cmd);
-	i2c_master_cmd_begin(I2C_NUM, cmd, 1000 / portTICK_PERIOD_MS);
+	i2c_master_cmd_begin(i2c_device_config_->i2c_num, cmd, 1000 / portTICK_PERIOD_MS);
 	i2c_cmd_link_delete(cmd);
 
 	return (true);

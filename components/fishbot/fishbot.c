@@ -33,7 +33,14 @@ bool fishbot_init_hardware(void)
         return false;
     if (!motor_init())
         return false;
+    if (!i2c_device_init())
+        return false;
     if (!oled_init())
         return false;
+    mpu6050_init();
+    if (!mpu6050_test_connection())
+        return false;
+    // if (!mpu6050_tes)
+
     return true;
 }

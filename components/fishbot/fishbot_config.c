@@ -51,7 +51,7 @@ static pid_ctrl_config_t pid_config[] = {
 static motor_config_t motor_configs[] = {
     {
         .motor_id = 0,
-        .io_pwm = 18,
+        .io_pwm = 4,
         .io_positive = 22,
         .io_negative = 23,
         .io_encoder_positive = 32,
@@ -59,7 +59,7 @@ static motor_config_t motor_configs[] = {
     },
     {
         .motor_id = 1,
-        .io_pwm = 19,
+        .io_pwm = 5,
         .io_positive = 13,
         .io_negative = 12,
         .io_encoder_positive = 25,
@@ -67,12 +67,18 @@ static motor_config_t motor_configs[] = {
     },
 };
 
+i2c_device_config_t i2c_device_config = {
+    .scl_pin = 19,
+    .sda_pin = 18,
+    .i2c_num = I2C_NUM_0,
+};
+
 bool fishbot_config_init()
 {
     // TODO(小鱼) 从flash读取配置
-    set_led_config(DEFAULT_LED_NUM,led_configs);
-    // bool set_motor_config(uint8_t motor_num_, motor_config_t *motor_configs, pid_ctrl_config_t *pid_configs);
+    set_led_config(DEFAULT_LED_NUM, led_configs);
     set_motor_config(DEFAULT_MOTOR_NUM, motor_configs, pid_config);
+    set_i2c_device_config(&i2c_device_config);
     return true;
 }
 

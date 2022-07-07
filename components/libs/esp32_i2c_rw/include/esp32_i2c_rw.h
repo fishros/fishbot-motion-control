@@ -20,7 +20,6 @@ typedef struct
 {
     uint8_t scl_pin;
     uint8_t sda_pin;
-    uint8_t address;
     uint8_t i2c_num;
 } i2c_device_config_t;
 

@@ -24,7 +24,7 @@ static pid_ctrl_config_t *pid_config_ = 0;
 static motor_config_t *motor_config_ = 0;
 static uint8_t ledc_channel_map[] = {LEDC_CHANNEL_0, LEDC_CHANNEL_1, LEDC_CHANNEL_2, LEDC_CHANNEL_3};
 /* PID\编码器 */
-static pid_ctrl_block_handle_t *pid_ctrl_block_handle_[MAX_MOTOR_NUM];
+static pid_ctrl_block_handle_t pid_ctrl_block_handle_[MAX_MOTOR_NUM];
 // static uint8_t *ledc_channel_[MAX_MOTOR_NUM];
 static rotary_encoder_t *rotary_encoder_[MAX_MOTOR_NUM];
 
@@ -82,7 +82,7 @@ bool motor_init(void)
         };
         ledc_channel_config(&ledc_channel);
         // pid 配置初始化
-        pid_new_control_block(pid_config_ + i, pid_ctrl_block_handle_[i]);
+        pid_new_control_block(pid_config_ + i, pid_ctrl_block_handle_ + i);
     }
 
     return true;

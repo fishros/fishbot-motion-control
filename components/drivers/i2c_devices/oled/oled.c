@@ -141,15 +141,17 @@ bool oled_init()
                           0xf0, 0xd9, 0x22, 0xda, 0x12, 0xdb,
                           0x20, 0x8d, 0x14, 0xaf};
     esp32_i2c_write_bytes(OLED_ADDR, 0x00, 28, cmd_data);
-    vTaskDelay(200 / portTICK_RATE_MS);
     oled_clear();
-    oled_ascii(0, 0, "  FishBotV1.0  ");
+    oled_ascii(0, 0, " FishBotV1.0.0 ");
+    // oled_ascii(0, 2, "  fishros.com  ");
+    // oled_ascii(0, 4, " fishros.org.cn");
+    oled_ascii(0, 3, "   2022-07-07  ");
     return true;
 }
 
 void oled_ascii(uint8_t x, uint8_t y, char *str)
 {
-    esp32_i2c_write_byte(OLED_ADDR, x, y);
+    oled_setxy(x, y);
     for (int i = 0; i < 16 && (str[i] != 0); i++)
     {
         for (int j = 0; j < 8; j++)
