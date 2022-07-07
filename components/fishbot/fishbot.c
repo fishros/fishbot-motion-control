@@ -9,15 +9,9 @@
 
 #define FISHBOT_MODLUE "FISHBOT"
 
-static fishbot_config_t fishbot_config = {
-    .driver_version = "fbmcd.v1.0.0.220703",
-    .hardware_version = "fbmch.v1.0.0.220721",
-    .motors_num = 2,
-};
-
 bool fishbot_init(void)
 {
-    fishbot_configurate_init(&fishbot_config);
+    fishbot_config_init();
     ESP_LOGI(FISHBOT_MODLUE, "fishbot init with %s:%s", fishbot_config_get_driver_version(), fishbot_config_get_hardware_version());
     if (!fishbot_init_hardware())
         return false;
@@ -25,15 +19,10 @@ bool fishbot_init(void)
     return true;
 }
 
-bool fishbot_task_start(void)
+bool fishbot_task_init(void)
 {
     led_task_init();
     motor_task_init();
-    return true;
-}
-bool fishbot_configurate_init(const fishbot_config_t *config)
-{
-    // TODO(小鱼) 从flash读取配置
     return true;
 }
 
@@ -44,20 +33,7 @@ bool fishbot_init_hardware(void)
         return false;
     if (!motor_init())
         return false;
+    if (!oled_init())
+        return false;
     return true;
-}
-
-const fishbot_config_t *fishbot_get_configuration(void)
-{
-    return &fishbot_config;
-}
-
-const char *fishbot_config_get_driver_version(void)
-{
-    return fishbot_config.driver_version;
-}
-
-const char *fishbot_config_get_hardware_version()
-{
-    return fishbot_config.hardware_version;
 }

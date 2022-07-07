@@ -8,19 +8,33 @@
 #ifndef __LED_H__
 #define __LED_H__
 
+/* freertos includes */
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
+/* esp includes */
+#include "driver/gpio.h"
 #include "esp_log.h"
+
+#include "fishbot_config.h"
 
 #define LED_POL_POS 0
 #define LED_POL_NEG 1
 
-#define LED_NUM 1
-#define LED_GPIO_BLUE 2
-#define LED_POL_BLUE LED_POL_POS
-
-typedef enum
+typedef struct
 {
-    LED_BLUE = 0,
-} led_t;
+    uint8_t id;
+    uint8_t led_pin;
+    uint8_t led_polarity;
+} led_config_t;
+
+/**
+ * @brief Set the led config object
+ *
+ * @param led_configs
+ * @param led_nums
+ */
+void set_led_config(uint8_t led_nums, led_config_t *led_configs);
 
 /**
  * @brief 初始化led
@@ -42,7 +56,7 @@ bool led_test(void);
  * @param led
  * @param value
  */
-void led_set(led_t led, bool value);
+void led_set(uint8_t id, bool value);
 
 /**
  * @brief led任务

@@ -30,5 +30,5 @@ void app_main(void)
         while (1)
             ;
     }
-    fishbot_task_start();
+    fishbot_task_init();
 }

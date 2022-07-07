@@ -1,3 +1,10 @@
+/**
+ * @brief 文件描述：待更新
+ * @author 小鱼 (fishros@foxmail.com)
+ * @version V1.0.0
+ * @date 2022-07-07
+ * @copyright 版权所有：FishBot Open Source Organization
+ */
 #ifndef _MOTOR_H_
 #define _MOTOR_H_
 
@@ -10,10 +17,11 @@
 
 #include "rotary_encoder.h"
 #include "pid_controller.h"
+
 #include "driver/ledc.h"
 #include "driver/gpio.h"
 
-#define MOTOR_NUM 2
+#define MAX_MOTOR_NUM 6
 
 typedef struct
 {
@@ -26,20 +34,23 @@ typedef struct
 } motor_config_t;
 
 /**
+ * @brief 初始化配置参数
+ *
+ * @param motor_num_
+ * @param motor_configs
+ * @param pid_configs
+ * @return true
+ * @return false
+ */
+bool set_motor_config(uint8_t motor_num_, motor_config_t *motor_configs, pid_ctrl_config_t *pid_configs);
+
+/**
  * @brief 初始化电机，编码器&PWM
  *
  * @return true
  * @return false
  */
 bool motor_init(void);
-
-/**
- * @brief 初始化配置参数
- *
- * @return true
- * @return false
- */
-bool motor_config_init(void);
 
 /**
  * @brief 电机控制任务
