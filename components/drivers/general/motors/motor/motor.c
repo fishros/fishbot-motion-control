@@ -16,6 +16,7 @@
         gpio_set_level(motor_config_[motor_id].io_positive, 1);                  \
         gpio_set_level(motor_config_[motor_id].io_negative, 0);                  \
         ledc_set_duty(LEDC_HIGH_SPEED_MODE, ledc_channel_map[motor_id], output); \
+        ledc_update_duty(LEDC_HIGH_SPEED_MODE, ledc_channel_map[motor_id]);      \
     }
 
 /*configs*/
@@ -54,7 +55,7 @@ bool motor_init(void)
         .timer_num = LEDC_TIMER_0,            // timer index
         .clk_cfg = LEDC_AUTO_CLK,             // Auto select the source clock
     };
-    ledc_timer_config(&ledc_timer);
+    ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
 
     for (i = 0; i < motor_num_; i++)
     {
@@ -73,14 +74,14 @@ bool motor_init(void)
 
         // PWM初始化
         ledc_channel_config_t ledc_channel = {
-            .channel = ledc_channel_map[motor_config_[i].motor_id],
+            .channel = ledc_channel_map[i],
             .duty = 0,
             .gpio_num = motor_config_[i].io_pwm,
             .speed_mode = LEDC_HIGH_SPEED_MODE,
             .hpoint = 0,
             .timer_sel = LEDC_TIMER_0,
         };
-        ledc_channel_config(&ledc_channel);
+        ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
         // pid 配置初始化
         pid_new_control_block(pid_config_ + i, pid_ctrl_block_handle_ + i);
     }
@@ -88,18 +89,25 @@ bool motor_init(void)
     return true;
 }
 
-// static int32_t last_time_mm = xTaskGetTickCount();
+static int32_t last_time_mm;
+static int32_t current_time_mm;
+static uint16_t delta_time_mm;
+static int32_t tick_count[MAX_MOTOR_NUM];
 static void motor_task(void *param)
 {
     uint8_t i;
     // float spped_left, spped_right = 0;
+    delta_time_mm = 0;
+    last_time_mm = xTaskGetTickCount();
+    current_time_mm = xTaskGetTickCount();
     while (1)
     {
         for (i = 0; i < motor_num_; i++)
         {
+            delta_time_mm = last_time_mm - xTaskGetTickCount();
             // update ecoder
-            int32_t tick = rotary_encoder_[i]->get_counter_value(rotary_encoder_[i]);
-            ESP_LOGI(FISHBOT_MODLUE, "tick %d:%d", i, tick);
+            tick_count[i] = rotary_encoder_[i]->get_counter_value(rotary_encoder_[i]);
+            // ESP_LOGI(FISHBOT_MODLUE, "tick %d:%d", i, tick);
             // calcute speed
             UPDATE_OUTPUT(i, 2000);
             // update pid

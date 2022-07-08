@@ -74,7 +74,7 @@ i2c_device_config_t i2c_device_config = {
 };
 
 fishbot_wifi_config_t wifi_config = {
-    .ssid = "mouse",
+    .ssid = "fishbot",
     .pswd = "fishros.com",
     .mode = WIFI_MODE_STA,
     // .mode = WIFI_MODE_AP,
