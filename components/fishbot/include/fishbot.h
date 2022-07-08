@@ -14,7 +14,7 @@
 #include "esp_log.h"
 #include "led.h"
 #include "motor.h"
-
+#include "protocol/include/uart_protocol.h"
 #define FISHBOT_SOFTWARE_VERSION_STRING_MAX_LEN (32 + 1)
 #define FISHBOT_HARDWARE_VERSION_STRING_MAX_LEN (32 + 1)
 
