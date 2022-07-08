@@ -88,12 +88,11 @@ bool motor_init(void)
     return true;
 }
 
+// static int32_t last_time_mm = xTaskGetTickCount();
 static void motor_task(void *param)
 {
     uint8_t i;
     // float spped_left, spped_right = 0;
-    // int32_t last_time_mm = xTaskGetTickCount();
-
     while (1)
     {
         for (i = 0; i < motor_num_; i++)

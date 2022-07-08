@@ -38,8 +38,9 @@ bool fishbot_init_hardware(void)
     if (!oled_init())
         return false;
     mpu6050_init();
-    if (!mpu6050_test_connection())
-        return false;
+    wifi_init();
+    // if (!mpu6050_test_connection())
+        // return false;
     // if (!mpu6050_tes)
 
     return true;

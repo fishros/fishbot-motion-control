@@ -14,6 +14,7 @@
 #include "rotary_encoder.h"
 #include "oled.h"
 #include "mpu6050.h"
+#include "wifi.h"
 
 #define FISHBOT_SOFTWARE_VERSION_STRING_MAX_LEN (32 + 1)
 #define FISHBOT_HARDWARE_VERSION_STRING_MAX_LEN (32 + 1)
@@ -22,6 +23,7 @@
 #define DEFAULT_LED_NUM 1
 // 蓝色灯的ID
 #define LED_BLUE 0
+// 默认的电机数量
 #define DEFAULT_MOTOR_NUM 2
 
 /**
@@ -35,6 +37,16 @@ typedef struct
     uint8_t motors_num;
 } fishbot_config_t;
 
+/**
+ * @brief 定义FISHBOT的通讯模式，目前提供USB串口通信，UDP手机APP通信和UDP电脑端通信。其中UDP_PC需要提供，SSID&PSWD HOST&PORT
+ *
+ */
+typedef enum
+{
+    MODE_USB=0,
+    MODE_WIFI_UDP_APP,
+    MODE_WIFI_UDP_PC,
+}fishbot_mode_t;
 
 /**
  * @brief 初始化配置文件，从nvs中加载配置文件
@@ -65,17 +77,10 @@ const char *fishbot_config_get_driver_version();
  */
 const char *fishbot_config_get_hardware_version();
 
-
-bool get_led_config();
-// get_motor_config
-// get_led_config
-// get_i2c_config
-
 // update motor pid config
 // update motor scale config
 // update wifi config
 // update udp server config
 // update transform config
-
 
 #endif // _FISHBOT_CONFIG_H_

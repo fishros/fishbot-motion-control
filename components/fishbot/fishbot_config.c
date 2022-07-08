@@ -73,12 +73,20 @@ i2c_device_config_t i2c_device_config = {
     .i2c_num = I2C_NUM_0,
 };
 
+fishbot_wifi_config_t wifi_config = {
+    .ssid = "mouse",
+    .pswd = "fishros.com",
+    .mode = WIFI_MODE_STA,
+    // .mode = WIFI_MODE_AP,
+};
+
 bool fishbot_config_init()
 {
     // TODO(小鱼) 从flash读取配置
     set_led_config(DEFAULT_LED_NUM, led_configs);
     set_motor_config(DEFAULT_MOTOR_NUM, motor_configs, pid_config);
     set_i2c_device_config(&i2c_device_config);
+    set_wifi_config(&wifi_config);
     return true;
 }
 

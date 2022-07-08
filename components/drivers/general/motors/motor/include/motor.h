@@ -21,7 +21,7 @@
 #include "driver/ledc.h"
 #include "driver/gpio.h"
 
-#define MAX_MOTOR_NUM 6
+#define MAX_MOTOR_NUM 4
 
 typedef struct
 {
