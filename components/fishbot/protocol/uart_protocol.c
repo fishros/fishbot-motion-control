@@ -238,7 +238,7 @@ void handle_case(const char* logName ,unsigned char *data_,int length_)
   //------校验正确-----
   //可以根据length_长度判断类型
   //13-----version  版本 or  速度控制
-  //15-----PID
+  //15-----PID数据
   //29-----传感器数据
   if(((rece_crc16_data >> 8) == data_[length_-2]) && ((unsigned char)rece_crc16_data == data_[length_-1]))
   {
