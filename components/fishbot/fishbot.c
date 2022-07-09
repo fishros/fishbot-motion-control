@@ -22,7 +22,8 @@ bool fishbot_init(void)
 bool fishbot_task_init(void)
 {
     led_task_init();
-    motor_task_init();
+    //motor_task_init(); //电机功能
+    uart_protocol_init();
     return true;
 }
 

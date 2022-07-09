@@ -1,6 +1,15 @@
 {
+<<<<<<< HEAD
     "files.associations": {
         "thread": "c",
         "motor.h": "c"
     }
+=======
+    "idf.adapterTargetName": "esp32",
+    "files.associations": {
+        "xutility": "c"
+    }
+
+
+>>>>>>> v1.0.0
 }

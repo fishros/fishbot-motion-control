@@ -10,6 +10,8 @@ set(PLANE_COMPONENT_DIRS ${PLANE_COMPONENT_DIRS}
                         "./components/drivers/general/motors"
                         "./components/drivers/i2c_devices"
                         "./components/libs"
+                        "./components/fishbot"
+                        "./components/fishbot/protocol"
                          )
 
 set(EXTRA_COMPONENT_DIRS "${EXTRA_COMPONENT_DIRS} ${PLANE_COMPONENT_DIRS}")
