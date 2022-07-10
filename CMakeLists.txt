@@ -11,7 +11,7 @@ set(PLANE_COMPONENT_DIRS ${PLANE_COMPONENT_DIRS}
                         "./components/drivers/i2c_devices"
                         "./components/libs"
                         "./components/fishbot"
-                        "./components/fishbot/protocol"
+                        "./components/protocol"
                          )
                          
 
