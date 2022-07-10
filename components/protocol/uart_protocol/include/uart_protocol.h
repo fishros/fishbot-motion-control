@@ -19,3 +19,5 @@
 
 #define TXD_PIN (GPIO_NUM_4)
 #define RXD_PIN (GPIO_NUM_5)
+
+bool uart_protocol_init(void);

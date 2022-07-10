@@ -37,16 +37,6 @@ typedef struct
     uint8_t motors_num;
 } fishbot_config_t;
 
-/**
- * @brief 定义FISHBOT的通讯模式，目前提供USB串口通信，UDP手机APP通信和UDP电脑端通信。其中UDP_PC需要提供，SSID&PSWD HOST&PORT
- *
- */
-typedef enum
-{
-    MODE_USB=0,
-    MODE_WIFI_UDP_APP,
-    MODE_WIFI_UDP_PC,
-}fishbot_mode_t;
 
 /**
  * @brief 初始化配置文件，从nvs中加载配置文件

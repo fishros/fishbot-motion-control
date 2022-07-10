@@ -12,3 +12,8 @@
 #include "uart_protocol.h"
 
 // static const int RX_BUF_SIZE = 1024; //串口缓存帧的大小
+
+bool uart_protocol_init(void)
+{
+    return true;
+}
