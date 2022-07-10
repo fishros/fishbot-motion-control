@@ -24,10 +24,6 @@
 
 #include <string.h>
 
-
-
-
-
 bool udp_client_init();
 bool set_udp_client_config();
 bool udp_client_send_data();
@@ -47,7 +43,6 @@ bool udp_client_send_data();
 //     .sum = 0,
 //     .END = 0x7E,
 // };
-
 
 // uint8_t calc_checksum(char *p_data, int32_t data_len)
 // {

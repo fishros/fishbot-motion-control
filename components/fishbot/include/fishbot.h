@@ -16,14 +16,9 @@
 #include "esp_log.h"
 #include "led.h"
 #include "motor.h"
-<<<<<<< HEAD
-
-=======
-#include "protocol/include/uart_protocol.h"
+// #include "protocol/include/uart_protocol.h"
 #define FISHBOT_SOFTWARE_VERSION_STRING_MAX_LEN (32 + 1)
 #define FISHBOT_HARDWARE_VERSION_STRING_MAX_LEN (32 + 1)
->>>>>>> v1.0.0
-
 
 /**
  * @brief 加载配置，初始化硬件
@@ -48,7 +43,5 @@ bool fishbot_init_hardware(void);
  * @return false
  */
 bool fishbot_task_init(void);
-
-
 
 #endif // _FISHBOT_H_
