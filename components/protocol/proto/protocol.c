@@ -1,5 +1,9 @@
 #include "protocol.h"
 
+
+#define FISHBOT_MODLUE "PROTOCOL"
+
+
 static protocol_config_t *protocol_config_;
 
 bool set_protocol_config(protocol_config_t *protocol_config)
@@ -17,5 +21,6 @@ bool protocol_init()
   {
     // udp_client_init
   }
+
   return true;
 }

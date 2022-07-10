@@ -41,9 +41,12 @@ uint8_t mpu6050_device_address;
 uint8_t buffer[14];
 
 /**
- * @brief MPU6050 constructor.
+ * @brief Mpu6050 初始化
+ * 
+ * @return true 
+ * @return false 
  */
-void mpu6050_init();
+bool mpu6050_init();
 
 /**
  * @brief Verify the I2C connection. Make sure the device is connected and

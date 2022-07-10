@@ -48,6 +48,6 @@ typedef struct
 
 bool set_protocol_config(protocol_config_t *protocol_config);
 
-bool protocol_init();
+bool protocol_init(void);
 
 #endif // _PROTOCOL_H_

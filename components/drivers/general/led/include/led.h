@@ -40,7 +40,7 @@ void set_led_config(uint8_t led_nums, led_config_t *led_configs);
  * @brief 初始化led
  *
  */
-void led_init(void);
+bool led_init(void);
 
 /**
  * @brief led闪烁测试

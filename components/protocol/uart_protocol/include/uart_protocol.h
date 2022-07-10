@@ -17,7 +17,7 @@
 #include "driver/gpio.h"
 
 
-#define TXD_PIN (GPIO_NUM_4)
-#define RXD_PIN (GPIO_NUM_5)
+#define TXD_PIN (GPIO_NUM_17)
+#define RXD_PIN (GPIO_NUM_16)
 
 bool uart_protocol_init(void);

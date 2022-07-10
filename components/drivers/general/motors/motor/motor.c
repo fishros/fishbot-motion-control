@@ -86,6 +86,7 @@ bool motor_init(void)
         pid_new_control_block(pid_config_ + i, pid_ctrl_block_handle_ + i);
     }
 
+    ESP_LOGI(FISHBOT_MODLUE, "init success!");
     return true;
 }
 

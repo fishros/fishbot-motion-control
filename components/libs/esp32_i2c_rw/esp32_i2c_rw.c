@@ -17,12 +17,14 @@
 #include <freertos/task.h>
 #include "esp32_i2c_rw.h"
 
+#define FISHBOT_MODLUE "I2C_RW"
+
 #define I2C_NUM (I2C_NUM_0)
-#define I2C_MASTER_FREQ_HZ          400000                     /*!< I2C master clock frequency */
-#define I2C_MASTER_NUM              0                          /*!< I2C master i2c port number, the number of i2c peripheral interfaces available will depend on the chip */
-#define I2C_MASTER_TX_BUF_DISABLE   0                          /*!< I2C master doesn't need buffer */
-#define I2C_MASTER_RX_BUF_DISABLE   0                          /*!< I2C master doesn't need buffer */
-#define I2C_MASTER_TIMEOUT_MS       1000
+#define I2C_MASTER_FREQ_HZ 400000	/*!< I2C master clock frequency */
+#define I2C_MASTER_NUM 0			/*!< I2C master i2c port number, the number of i2c peripheral interfaces available will depend on the chip */
+#define I2C_MASTER_TX_BUF_DISABLE 0 /*!< I2C master doesn't need buffer */
+#define I2C_MASTER_RX_BUF_DISABLE 0 /*!< I2C master doesn't need buffer */
+#define I2C_MASTER_TIMEOUT_MS 1000
 
 static i2c_device_config_t *i2c_device_config_;
 
@@ -47,17 +49,20 @@ bool i2c_device_init(void)
 
 	int i2c_master_port = 0;
 
-    i2c_config_t conf = {
-        .mode = I2C_MODE_MASTER,
-        .sda_io_num = i2c_device_config_->sda_pin,
-        .scl_io_num = i2c_device_config_->scl_pin,
-        .sda_pullup_en = 0,
-        .scl_pullup_en = 0,
-        .master.clk_speed = I2C_MASTER_FREQ_HZ,
-    };
+	i2c_config_t conf = {
+		.mode = I2C_MODE_MASTER,
+		.sda_io_num = i2c_device_config_->sda_pin,
+		.scl_io_num = i2c_device_config_->scl_pin,
+		.sda_pullup_en = 0,
+		.scl_pullup_en = 0,
+		.master.clk_speed = I2C_MASTER_FREQ_HZ,
+	};
 
-    i2c_param_config(i2c_master_port, &conf);
-    i2c_driver_install(i2c_master_port, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0);
+	i2c_param_config(i2c_master_port, &conf);
+	i2c_driver_install(i2c_master_port, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0);
+
+	ESP_LOGI(FISHBOT_MODLUE, "init success!");
+
 	return true;
 }
 

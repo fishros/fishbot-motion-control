@@ -80,13 +80,19 @@ fishbot_wifi_config_t wifi_config = {
     // .mode = WIFI_MODE_AP,
 };
 
+protocol_config_t protocol_config = {
+    .mode = MODE_USB,
+};
+
 bool fishbot_config_init()
 {
     // TODO(小鱼) 从flash读取配置
     set_led_config(DEFAULT_LED_NUM, led_configs);
     set_motor_config(DEFAULT_MOTOR_NUM, motor_configs, pid_config);
     set_i2c_device_config(&i2c_device_config);
+    // usb 模式也开启wifi,通过手机查看日志信息和控制机器人
     set_wifi_config(&wifi_config);
+    set_protocol_config(&protocol_config);
     return true;
 }
 

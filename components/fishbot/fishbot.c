@@ -9,6 +9,12 @@
 
 #define FISHBOT_MODLUE "FISHBOT"
 
+#define FISHBOT_ERROR_CHECK(MODULE, RESULT) \
+    if (RESULT)                             \
+        ESP_LOGI(MODULE, "init success~!"); \
+    else                                    \
+        ESP_LOGE(MODULE, "init failed~!");
+
 bool fishbot_init(void)
 {
     fishbot_config_init();
@@ -22,15 +28,14 @@ bool fishbot_init(void)
 bool fishbot_task_init(void)
 {
     led_task_init();
-    //motor_task_init(); //电机功能
-    // uart_protocol_init();
+    // motor_task_init(); //电机功能
+    //  uart_protocol_init();
     return true;
 }
 
 bool fishbot_init_hardware(void)
 {
-    led_init();
-    if (!led_test())
+    if (!led_init())
         return false;
     if (!motor_init())
         return false;
@@ -38,11 +43,17 @@ bool fishbot_init_hardware(void)
         return false;
     if (!oled_init())
         return false;
-    mpu6050_init();
-    wifi_init();
-    // if (!mpu6050_test_connection())
-        // return false;
-    // if (!mpu6050_tes)
-
+    if (!mpu6050_init())
+        return false;
+    if (!wifi_init())
+        return false;
+    if (!protocol_init())
+        return false;
+    char host[16];
+    if (get_wifi_ip(host) != WIFI_STATUS_STA_DISCONECTED)
+    {
+        oled_show_ascii_auto_line(" WIFI SUCCESS ");
+        oled_show_ascii_auto_line(host);
+    }
     return true;
 }

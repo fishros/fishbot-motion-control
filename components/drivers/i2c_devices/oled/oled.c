@@ -7,6 +7,11 @@
  */
 #include "oled.h"
 
+#define FISHBOT_MODLUE "OLED"
+#define OLED_MAX_LINES 3
+#define OLED_START_LINE 1
+
+static uint8_t last_line_ = 1;
 /*
   (0) !(1) "(2) #(3) $(4) %(5) &(6) '(7) ((8) )(9) *(10) +(11) ,(12) -(13) .(14) /(15)
  0(16) 1(17) 2(18) 3(19) 4(20) 5(21) 6(22) 7(23) 8(24) 9(25) :(26) ;(27) <(28) =(29) >(30) ?(31)
@@ -143,9 +148,25 @@ bool oled_init()
     esp32_i2c_write_bytes(OLED_ADDR, 0x00, 28, cmd_data);
     oled_clear();
     oled_ascii(0, 0, " FishBotV1.0.0 ");
-    // oled_ascii(0, 2, "  fishros.com  ");
-    // oled_ascii(0, 4, " fishros.org.cn");
-    oled_ascii(0, 3, "   2022-07-07  ");
+    // oled_show_ascii_auto_line("2022-07-07");
+    ESP_LOGI(FISHBOT_MODLUE, "init success!");
+    return true;
+}
+
+bool oled_show_ascii_auto_line(char *str)
+{
+    if (strlen(str) > 16)
+    {
+        ESP_LOGW(FISHBOT_MODLUE, "len can't >16 char!");
+        return false;
+    }
+    oled_ascii(0, last_line_ * 2, "              ");
+    oled_ascii(0, last_line_ * 2, str);
+    last_line_++;
+    if (last_line_ > OLED_MAX_LINES)
+    {
+        last_line_ = OLED_START_LINE;
+    }
     return true;
 }
 
@@ -168,28 +189,3 @@ void oled_ascii(uint8_t x, uint8_t y, char *str)
         }
     }
 }
-
-// void oled_write(uint8_t reg_address, uint8_t data)
-// {
-//     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-//     i2c_master_start(cmd);
-//         i2c_master_write_byte(cmd,OLED_ADDR<<1|WRITE_BIT, ACK_CHECK_EN);
-//         i2c_master_write_byte(cmd,reg_address,ACK_CHECK_EN);
-//         i2c_master_write_byte(cmd,data,ACK_CHECK_EN);
-//     i2c_master_stop(cmd);
-//     i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000/ portTICK_RATE_MS);
-//     i2c_cmd_link_delete(cmd);
-// }
-
-// void oled_writes(uint8_t reg_address, uint8_t *data,uint8_t data_len)
-// {
-//     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-//     i2c_master_start(cmd);
-//         i2c_master_write_byte(cmd,OLED_ADDR<<1|WRITE_BIT, ACK_CHECK_EN);
-//         i2c_master_write_byte(cmd,reg_address,ACK_CHECK_EN);
-//          i2c_master_write(cmd, data, data_len, ACK_CHECK_EN);
-//     i2c_master_stop(cmd);
-
-//     i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000/ portTICK_RATE_MS);
-//     i2c_cmd_link_delete(cmd);
-// }

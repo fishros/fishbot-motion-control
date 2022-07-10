@@ -57,6 +57,15 @@ void oled_clear(void);
 void oled_setxy(uint8_t x, uint8_t y);
 
 /**
+ * @brief 自动的一行行显示，自动覆盖
+ * 
+ * @param len 字符串长度
+ * @return true 
+ * @return false 
+ */
+bool oled_show_ascii_auto_line(char *str);
+
+/**
  * @brief 写ASSIC字符
  *
  * @param x

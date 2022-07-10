@@ -199,6 +199,7 @@ bool wifi_init()
         ESP_LOGI(FISHBOT_MODLUE, "wifi init with ap mode, ssid:%s pswd:%s", wifi_config_->ssid, wifi_config_->pswd);
         wifi_set_as_ap(wifi_config_->ssid, wifi_config_->pswd);
     }
+    ESP_LOGI(FISHBOT_MODLUE, "init success!");
     return true;
 }
 
@@ -210,11 +211,11 @@ wifi_status_t get_wifi_ip(char *ip_address)
     }
     else if (wifi_status_ == WIFI_STATUS_STA_CONNECTED)
     {
-        sprintf(ip_address, "192.168.4.1");
+        sprintf(ip_address, "%s", wifi_ip_);
     }
     else if (wifi_status_ == WIFI_STATUS_STA_DISCONECTED)
     {
         sprintf(ip_address, "lost_connect");
     }
-    return true;
+    return wifi_status_;
 }

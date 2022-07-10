@@ -21,10 +21,10 @@ void set_led_config(uint8_t led_nums, led_config_t *led_configs)
     led_num_ = led_nums;
 }
 
-void led_init(void)
+bool led_init(void)
 {
     if (is_init)
-        return;
+        return false;
     uint8_t i;
     for (i = 0; i < led_num_; i++)
     {
@@ -45,6 +45,16 @@ void led_init(void)
     }
 
     is_init = true;
+    if (led_test())
+    {
+        ESP_LOGI(FISHBOT_MODLUE, "init success!");
+        return true;
+    }
+    else
+    {
+        ESP_LOGE(FISHBOT_MODLUE, "init failed!");
+        return false;
+    }
 }
 bool led_test(void)
 {

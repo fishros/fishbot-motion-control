@@ -15,6 +15,8 @@
 #define ESP32_I2C_RW_H
 
 #include <driver/i2c.h>
+#include "esp_log.h"
+
 
 typedef struct
 {

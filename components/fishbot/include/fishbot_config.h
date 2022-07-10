@@ -15,6 +15,7 @@
 #include "oled.h"
 #include "mpu6050.h"
 #include "wifi.h"
+#include "protocol.h"
 
 #define FISHBOT_SOFTWARE_VERSION_STRING_MAX_LEN (32 + 1)
 #define FISHBOT_HARDWARE_VERSION_STRING_MAX_LEN (32 + 1)
