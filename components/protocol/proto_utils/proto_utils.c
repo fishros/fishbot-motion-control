@@ -44,20 +44,51 @@ uint16_t crc16(unsigned char *buf, int len)
     return crc;
 }
 
-/**
- * @brief 发送数据前调用的转义函数
- *
- * @param frame 未转义的数据帧
- */
-void escape_frame(char *frame)
+int escape_frame(char *frame, char *result, int len)
 {
+    uint16_t i = 0, j = 0;
+    result[j++] = FIRST_CODE;
+    for (i = 1; i < len - 1; i++)
+    {
+        printf("0x%02X-", frame[i]);
+        if (frame[i] == 0x5A)
+        {
+            result[j++] = 0x50;
+            result[j++] = 0x0A;
+            continue;
+        }
+        if (frame[i] == 0x50)
+        {
+            result[j++] = 0x50;
+            result[j++] = 0x05;
+            continue;
+        }
+        result[j++] = frame[i];
+    }
+    result[j++] = END_CODE;
+    return j;
 }
 
-/**
- * @brief 接收到数据后调用的反转义函数
- *
- * @param frame 待反转义的数据帧
- */
-void inverse_escape_frame(char *frame)
+int inverse_escape_frame(char *frame, char *result, int len)
 {
+    uint16_t i = 0, j = 0;
+    result[j++] = FIRST_CODE;
+    for (i = 1; i < len - 1; i++)
+    {
+        if (frame[i] == 0x50 && frame[i + 1] == 0x0A)
+        {
+            result[j++] = 0x5A;
+            i++;
+            continue;
+        }
+        if (frame[i] == 0x50 && frame[i + 1] == 0x05)
+        {
+            result[j++] = 0x50;
+            i++;
+            continue;
+        }
+        result[j++] = frame[i];
+    }
+    result[j++] = END_CODE;
+    return j;
 }

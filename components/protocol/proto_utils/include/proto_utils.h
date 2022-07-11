@@ -2,6 +2,19 @@
 #define _PROTO_UTILS_H_
 #include "freertos/FreeRTOS.h"
 
+#define RX_TX_PACKET_SIZE (128)
+
+#define FIRST_CODE 0x5A
+#define END_CODE 0x5A
+#define TARGET_ADD 0x01
+
+/* Structure used for in/out data via USB */
+typedef struct
+{
+    uint8_t size;
+    uint8_t data[RX_TX_PACKET_SIZE];
+} protocol_package_t;
+
 /**
  * @brief crc16-XMODEM校验
  *
@@ -11,18 +24,8 @@
  */
 uint16_t crc16(unsigned char *buf, int len);
 
-/**
- * @brief 发送数据前调用的转义函数
- *
- * @param frame 未转义的数据帧
- */
-void escape_frame(char *frame);
+int escape_frame(char *frame, char *result, int len);
 
-/**
- * @brief 接收到数据后调用的反转义函数
- *
- * @param frame 待反转义的数据帧
- */
-void inverse_escape_frame(char *frame);
+int inverse_escape_frame(char *frame, char *result, int len);
 
 #endif // _PROTO_UTILS_H_

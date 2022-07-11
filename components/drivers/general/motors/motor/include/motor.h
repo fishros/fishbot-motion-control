@@ -20,6 +20,7 @@
 
 #include "driver/ledc.h"
 #include "driver/gpio.h"
+#include "protocol.h"
 
 #define MAX_MOTOR_NUM 4
 

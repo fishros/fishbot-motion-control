@@ -29,10 +29,10 @@ typedef enum
 
 typedef struct
 {
-   float kp;
-   float ki;
-   float kd;
-} pid_data_t;
+    float kp;
+    float ki;
+    float kd;
+} proto_pid_data_t;
 
 typedef struct
 {
@@ -41,19 +41,21 @@ typedef struct
 
 typedef struct
 {
-    float g[3];
-    float a[3];
+    float accel[3];
+    float gyro[3];
+    float quat[4];
 } imu_data_t;
 
-// 数据帧定义
+/* 定义更新PID数据的钩子 */
+typedef uint8_t (*update_pid_params_fun_t)(proto_pid_data_t *pid);
 
 void parse_frame_data(char *frame);
 
+bool proto_register_update_pid_fun(update_pid_params_fun_t *update_pid_params_fun);
 
-bool register_update_callback_fun();
-
-// void get_frame_from_struct(void);
-
-
+bool deal_frame_data();
+bool get_frame_data();
+// typedef struct pid_ctrl_block_t pid_ctrl_block_t;
+// typedef float (*pid_cal_func_t)(pid_ctrl_block_t *pid, float error);
 
 #endif // _PROTO_V1_0_0_220621_H_

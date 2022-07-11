@@ -46,8 +46,10 @@ typedef struct
     mode_usb_config_t udp_config;
 } protocol_config_t;
 
-bool set_protocol_config(protocol_config_t *protocol_config);
 
+
+bool set_protocol_config(protocol_config_t *protocol_config);
 bool protocol_init(void);
+bool protocol_task_init(void);
 
 #endif // _PROTOCOL_H_

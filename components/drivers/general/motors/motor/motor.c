@@ -37,6 +37,12 @@ bool set_motor_config(uint8_t motor_num, motor_config_t *motor_configs, pid_ctrl
     return true;
 }
 
+uint8_t update_pid_params(proto_pid_data_t *proto_pid_data)
+{
+    // pid_update_parameters(pid_ctrl_block_handle_[0],);
+    return true;
+}
+
 /**
  * @brief 初始化电机，编码器&PWM
  *
@@ -85,7 +91,8 @@ bool motor_init(void)
         // pid 配置初始化
         pid_new_control_block(pid_config_ + i, pid_ctrl_block_handle_ + i);
     }
-
+    /*注册pid更新回调函数*/
+    proto_register_update_pid_fun(update_pid_params);
     ESP_LOGI(FISHBOT_MODLUE, "init success!");
     return true;
 }
