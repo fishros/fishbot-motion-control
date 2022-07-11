@@ -31,6 +31,30 @@ bool protocol_init()
   return true;
 }
 
+void deal_recv_data()
+{
+  // get a frame
+  // crccheck
+  // target div
+  // call fun update
+}
+
+void proto_upload_data_task(void *param)
+{
+
+  // gen a frame
+  // crc16
+  // send data
+  protocol_package_t protocol_package;
+  sprintf((char *)protocol_package.data, "hello fishbot!\n");
+  protocol_package.size = 15;
+  while (true)
+  {
+    xQueueSend(data_tx_queue_, &protocol_package, 2 / portTICK_RATE_MS);
+    vTaskDelay(1000 / portTICK_RATE_MS);
+  }
+}
+
 bool protocol_task_init(void)
 {
   // 根据模式启动不同通信任务
@@ -43,20 +67,6 @@ bool protocol_task_init(void)
     // udp_client_init
   }
   // start self task
+  xTaskCreate(proto_upload_data_task, "proto_upload_data_task", 1024 * 2, NULL, 5, NULL); //接收任务
   return true;
-}
-
-void deal_recv_data()
-{
-  // get a frame
-  // crccheck
-  // target div
-  // call fun update
-}
-
-void deal_send_data()
-{
-  // gen a frame
-  // crc16 
-  // send data
 }
