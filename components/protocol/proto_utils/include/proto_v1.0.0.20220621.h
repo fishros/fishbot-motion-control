@@ -9,6 +9,7 @@
 #define _PROTO_V1_0_0_220621_H_
 
 #include "freertos/FreeRTOS.h"
+#include "proto_utils.h"
 
 #define MAX_MOTOR_NUM 6
 
@@ -48,14 +49,12 @@ typedef struct
 
 /* 定义更新PID数据的钩子 */
 typedef uint8_t (*update_pid_params_fun_t)(proto_pid_data_t *pid);
-
-void parse_frame_data(char *frame);
-
 bool proto_register_update_pid_fun(update_pid_params_fun_t *update_pid_params_fun);
 
-bool deal_frame_data();
-bool get_frame_data();
-// typedef struct pid_ctrl_block_t pid_ctrl_block_t;
-// typedef float (*pid_cal_func_t)(pid_ctrl_block_t *pid, float error);
+
+/*解析和获取一帧数据*/
+uint16_t proto_deal_frame_data(protocol_package_t* protocol_package);
+uint16_t proto_get_upload_frame(protocol_package_t* protocol_package);
+
 
 #endif // _PROTO_V1_0_0_220621_H_

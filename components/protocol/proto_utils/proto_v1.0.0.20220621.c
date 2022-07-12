@@ -7,3 +7,22 @@ bool proto_register_update_pid_fun(update_pid_params_fun_t *update_pid_params_fu
     update_pid_params_fun = update_pid_params_fun;
     return true;
 }
+
+uint16_t proto_deal_frame_data(protocol_package_t *protocol_package)
+{
+    static uint8_t frame[RX_TX_PACKET_SIZE];
+    static uint16_t frame_size = 0;
+    frame_size = inverse_escape_frame(protocol_package->data, frame, protocol_package->size);
+    print_frame_to_hex((uint8_t *)"uart frame", frame, frame_size);
+    return protocol_package->size;
+}
+
+static protocol_package_t protocol_package_;
+
+uint16_t proto_get_upload_frame(protocol_package_t *protocol_package)
+{
+    // protocol_package = &protocol_package_;
+    sprintf((char *)protocol_package->data, "This is a log frame!");
+    protocol_package->size = 21;
+    return protocol_package->size;
+}

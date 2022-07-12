@@ -28,6 +28,8 @@ typedef struct
 {
     char ssid[32];
     char pswd[64];
+    char ap_ssid[32];
+    char ap_pswd[64];
     wifi_mode_t mode;
 } fishbot_wifi_config_t;
 

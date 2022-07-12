@@ -17,8 +17,12 @@
 #include "driver/gpio.h"
 #include "proto_utils.h"
 
-#define TXD_PIN (GPIO_NUM_17)
-#define RXD_PIN (GPIO_NUM_16)
+#define TXD_LOG_PIN (GPIO_NUM_17)
+#define RXD_LOG_PIN (GPIO_NUM_16)
+
+#define TXD_CP2102_PIN (GPIO_NUM_1)
+#define RXD_CP2102_PIN (GPIO_NUM_3)
+
 
 bool uart_protocol_init(xQueueHandle *rx_queue, xQueueHandle *tx_queue);
 

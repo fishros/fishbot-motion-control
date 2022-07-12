@@ -22,10 +22,12 @@ typedef struct
  * @param len 数组长度
  * @return uint16_t
  */
-uint16_t crc16(unsigned char *buf, int len);
+uint16_t crc16(uint8_t *buf, int len);
 
-int escape_frame(char *frame, char *result, int len);
+int escape_frame(uint8_t *frame, uint8_t *result, int len);
 
-int inverse_escape_frame(char *frame, char *result, int len);
+int inverse_escape_frame(uint8_t *frame, uint8_t *result, int len);
+
+void print_frame_to_hex(uint8_t *title, uint8_t *buffer, uint16_t size);
 
 #endif // _PROTO_UTILS_H_

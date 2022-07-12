@@ -12,10 +12,13 @@
 #include "uart_protocol.h"
 
 #define UART_USB_NUM UART_NUM_1
+#define UART_LOG_NUM UART_NUM_0
+
+#define UART_PROTOC_NUM UART_USB_NUM
+
+
 #define TX_BUF_SIZE 256 // 串口缓存帧的大小
 #define RX_BUF_SIZE 256 // 串口缓存帧的大小
-// static const int RX_BUF_SIZE = 256;
-// static const int TX_BUF_SIZE = 256;
 
 static xQueueHandle *rx_queue_;
 static xQueueHandle *tx_queue_;
@@ -36,10 +39,14 @@ void uart_init(void)
         .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
         .source_clk = UART_SCLK_APB,
     };
-    // We won't use a buffer for sending data.
+    // 发送数据用CP2101
     uart_driver_install(UART_USB_NUM, RX_BUF_SIZE * 2, 0, 0, NULL, 0);
     uart_param_config(UART_USB_NUM, &uart_config);
-    uart_set_pin(UART_USB_NUM, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+    uart_set_pin(UART_USB_NUM, TXD_CP2102_PIN, RXD_CP2102_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+    // 日志放到日志另外引脚打印出来
+    uart_driver_install(UART_LOG_NUM, RX_BUF_SIZE * 2, 0, 0, NULL, 0);
+    uart_param_config(UART_LOG_NUM, &uart_config);
+    uart_set_pin(UART_LOG_NUM, TXD_LOG_PIN, RXD_LOG_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 }
 
 bool uart_protocol_init(xQueueHandle *rx_queue, xQueueHandle *tx_queue)
@@ -64,7 +71,7 @@ static void uart_tx_task(void *pvParameters)
         }
         if (xQueueReceive(*tx_queue_, &frame_pack_tx_, 5) == pdTRUE)
         {
-            tx_bytes_len = uart_write_bytes(UART_USB_NUM, frame_pack_tx_.data, frame_pack_tx_.size);
+            tx_bytes_len = uart_write_bytes(UART_PROTOC_NUM, frame_pack_tx_.data, frame_pack_tx_.size);
             if (tx_bytes_len <= 0)
             {
                 // TODO() Add Error LOG!
@@ -91,7 +98,7 @@ static void uart_rx_task(void *pvParameters)
             continue;
         }
 
-        rx_bytes_len = uart_read_bytes(UART_USB_NUM, frame_buffer_rx_ + rx_index, RX_BUF_SIZE, 10 / portTICK_RATE_MS);
+        rx_bytes_len = uart_read_bytes(UART_PROTOC_NUM, frame_buffer_rx_ + rx_index, RX_BUF_SIZE, 10 / portTICK_RATE_MS);
 
         if (rx_bytes_len <= 0)
         {
@@ -101,7 +108,6 @@ static void uart_rx_task(void *pvParameters)
         // 处理数据
         for (i = 0; i < rx_index + rx_bytes_len; i++)
         {
-            // printf("0x%02X-", frame_buffer_rx_[i]);
             if (frame_buffer_rx_[i] == 0x5A)
             {
                 if (frame_start_index == -1)

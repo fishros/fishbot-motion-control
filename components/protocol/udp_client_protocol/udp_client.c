@@ -3,21 +3,7 @@
 // extern int16_t target_spped_left;
 // extern int16_t target_spped_right;
 
-static void print_hex(char *buffer, int len)
-{
-    int i;
-    printf("********************************************************\n");
-    for (i = 1; i <= len; i++)
-    {
-        printf("0x%02X ", buffer[i - 1]);
-        if (i % 16 == 0)
-        {
-            printf("\n");
-        }
-    }
-    printf("\n");
-    printf("********************************************************\n");
-}
+
 
 #define FISHBOT_MODULE "UDP_CLIENT"
 
