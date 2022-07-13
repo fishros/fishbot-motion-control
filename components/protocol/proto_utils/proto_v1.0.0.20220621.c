@@ -19,10 +19,16 @@ uint16_t proto_deal_frame_data(protocol_package_t *protocol_package)
 
 static protocol_package_t protocol_package_;
 
-uint16_t proto_get_upload_frame(protocol_package_t *protocol_package)
+uint16_t proto_get_upload_frame(protocol_package_t **protocol_package)
 {
-    // protocol_package = &protocol_package_;
-    sprintf((char *)protocol_package->data, "This is a log frame!");
-    protocol_package->size = 21;
-    return protocol_package->size;
+    // update data 
+
+    // crc16 data
+
+    // compose
+    sprintf((char *)protocol_package_.data, "This is a log frame!");
+    protocol_package_.size = 21;
+    // return
+    *protocol_package = &protocol_package_;
+    return (*protocol_package)->size;
 }

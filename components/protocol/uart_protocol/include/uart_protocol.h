@@ -23,7 +23,20 @@
 #define TXD_CP2102_PIN (GPIO_NUM_1)
 #define RXD_CP2102_PIN (GPIO_NUM_3)
 
-
+/**
+ * @brief 串口协议初始化
+ *
+ * @param rx_queue 接受队列
+ * @param tx_queue 发送队列
+ * @return true
+ * @return false
+ */
 bool uart_protocol_init(xQueueHandle *rx_queue, xQueueHandle *tx_queue);
 
+/**
+ * @brief 串口任务初始化
+ *
+ * @return true
+ * @return false
+ */
 bool uart_protocol_task_init(void);

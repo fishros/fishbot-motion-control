@@ -105,7 +105,7 @@ static void uart_rx_task(void *pvParameters)
             continue;
         }
 
-        // 处理数据
+        // 处理数据,将数据分解为一帧帧
         for (i = 0; i < rx_index + rx_bytes_len; i++)
         {
             if (frame_buffer_rx_[i] == 0x5A)

@@ -41,18 +41,11 @@ void deal_recv_data()
 
 void proto_upload_data_task(void *param)
 {
-  // gen a frame
-
-  // crc16
-  // send data
-  // static protocol_package_t *protocol_package;
-  static protocol_package_t protocol_package;
-  sprintf((char *)protocol_package.data, "hello fishbot!\n");
-  protocol_package.size = 15;
+  static protocol_package_t *protocol_package;
   while (true)
   {
     proto_get_upload_frame(&protocol_package);
-    xQueueSend(data_tx_queue_,&protocol_package, 2 / portTICK_RATE_MS);
+    xQueueSend(data_tx_queue_,protocol_package, 2 / portTICK_RATE_MS);
     vTaskDelay(1000 / portTICK_RATE_MS);
   }
 }

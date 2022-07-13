@@ -13,6 +13,10 @@
 
 #define MAX_MOTOR_NUM 6
 
+/**
+ * @brief 数据ID定义
+ *
+ */
 typedef enum
 {
     DATA_ENCODER = 0x01,  // 0x01-左右轮编码器
@@ -20,14 +24,22 @@ typedef enum
     DATA_SPEED = 0x03,    // 0x03-速度控制数据
     DATA_PID = 0x04,      // 0x04-PID设置
     DATA_VER_INFO = 0x05, // 0x05-版本信息
-} data_id_t;
+} proto_data_id_t;
 
+/**
+ * @brief 数据传输方向定义
+ *
+ */
 typedef enum
 {
     DATA_TO_MASTER = 0x01, // 0X01,反馈数据（底盘向主控）
     DATA_TO_FBMC = 0x02,   // 0X02,命令数据（主控向底盘）
-} data_direction_t;
+} proto_data_direction_t;
 
+/**
+ * @brief PID数据结构体
+ *
+ */
 typedef struct
 {
     float kp;
@@ -35,26 +47,79 @@ typedef struct
     float kd;
 } proto_pid_data_t;
 
+/**
+ * @brief 电机编码器数据结构体
+ *
+ */
 typedef struct
 {
-    uint16_t motor_speed[MAX_MOTOR_NUM];
-} motor_speed_ctrl_t;
+    uint32_t motor_encoder[MAX_MOTOR_NUM]; // 电机的编码器数据
+} proto_motor_encoder_data_t;
 
+/**
+ * @brief 电机速度控制结构体
+ *
+ */
 typedef struct
 {
-    float accel[3];
-    float gyro[3];
-    float quat[4];
-} imu_data_t;
+    uint16_t motor_speed[MAX_MOTOR_NUM]; // 单位mm/s
+} proto_motor_speed_ctrl_data_t;
 
-/* 定义更新PID数据的钩子 */
+/**
+ * @brief IMU数据结构体
+ *
+ */
+typedef struct
+{
+    float accel[3]; // 加速度
+    float gyro[3];  // 重力加速度
+    float quat[4];  // 四元数 xyzw
+} proto_imu_data_t;
+
+/**
+ * @brief 定义更新PID数据的钩子
+ *
+ */
 typedef uint8_t (*update_pid_params_fun_t)(proto_pid_data_t *pid);
+
+/**
+ * @brief 注册更新PID数据的钩子函数
+ *
+ * @param update_pid_params_fun
+ * @return true
+ * @return false
+ */
 bool proto_register_update_pid_fun(update_pid_params_fun_t *update_pid_params_fun);
 
+/**
+ * @brief 定义更新速度数据的钩子
+ *
+ */
+typedef uint8_t (*update_speed_params_fun_t)(proto_motor_speed_ctrl_data_t *pid);
 
-/*解析和获取一帧数据*/
-uint16_t proto_deal_frame_data(protocol_package_t* protocol_package);
-uint16_t proto_get_upload_frame(protocol_package_t* protocol_package);
+/**
+ * @brief 注册更新电机速度数据的钩子
+ *
+ * @param update_motor_speed_ctrl_fun
+ * @return true
+ * @return false
+ */
+bool proto_register_update_motor_speed_fun(update_speed_params_fun_t *update_motor_speed_ctrl_fun);
 
+/**
+ * @brief 解析和获取一帧数据（根据数据调用不同的钩子完成数据的更新到各个模块）
+ *
+ * @param protocol_package 数据包指针
+ * @return uint16_t
+ */
+uint16_t proto_deal_frame_data(protocol_package_t *protocol_package);
+
+/**
+ * @brief 获取一个需要上传的数据帧（包含传感器的信息组合）
+ *
+ * @param **protocol_package  指向数据包指针的指针
+ * @return uint16_t
+ */
+uint16_t proto_get_upload_frame(protocol_package_t **protocol_package);
 
 #endif // _PROTO_V1_0_0_220621_H_

@@ -24,48 +24,11 @@
 
 #include <string.h>
 
-bool udp_client_init();
 bool set_udp_client_config();
-bool udp_client_send_data();
+bool udp_client_protocol_init();
+bool udp_client_protocol_task_init();
 
-// void print_hex(char *buffer, int len);
-// void my_udp_init();
-// void send_data(char *data, uint8_t len);
-// check sum fun
-// uint8_t calc_checksum(char *p_data, int32_t data_len);
-// static motor frame = {
-//     .START=0x7D,
-//     .TARGET = 0x01,
-//     .CODE = 0X01,
-//     .data_len = 0x04,
-//     .spped_left = 0,
-//     .spped_right = 0,
-//     .sum = 0,
-//     .END = 0x7E,
-// };
+/* 该模块需要根据wifi链接情况进行一些额外操作 */
+/* 结构体可直接强转：(char *)&frame*/
 
-// uint8_t calc_checksum(char *p_data, int32_t data_len)
-// {
-//     uint8_t sum = 0;
-//     while (data_len--) {
-//         sum += *p_data++;
-//     }
-//     return sum;
-// }
-
-// static void handleData(char* data_buff,uint8_t data_len)
-// {
-//     switch(data_buff[2])
-//     {
-//         case 0x01: memcpy(&frame,data_buff,data_len); break;
-//     }
-//     // print_hex((char*)&frame,sizeof(frame));
-//     if(frame.sum==calc_checksum((char *)&frame+4,frame.data_len))
-//     {
-//         // ESP_LOGI(FISHBOT_MODULE, "speed_left:%d  spped_right:%d  ",frame.spped_left,frame.spped_right);
-//         target_spped_left = frame.spped_left;
-//         target_spped_right = frame.spped_right;
-//     }
-// }
-
-#endif
+#endif // _UDP_CLIENT_H_
