@@ -5,33 +5,28 @@
  * @date 2022-07-03
  * @copyright 版权所有：FishBot Open Source Organization
  */
-/* freertos includes */
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-
-/* esp includes */
-#include "driver/gpio.h"
 
 /* fishbot compont includes */
 #include "led.h"
 
 #define FISHBOT_MODLUE "LED"
 
-static unsigned int led_pin[] = {
-    [LED_BLUE] = LED_GPIO_BLUE,
-};
-static int led_polarity[] = {
-    [LED_BLUE] = LED_POL_BLUE,
-};
-
 static bool is_init = false;
+static uint8_t led_num_ = 0;
+static led_config_t *led_config_;
 
-void led_init(void)
+void set_led_config(uint8_t led_nums, led_config_t *led_configs)
+{
+    led_config_ = led_configs;
+    led_num_ = led_nums;
+}
+
+bool led_init(void)
 {
     if (is_init)
-        return;
+        return false;
     uint8_t i;
-    for (i = 0; i < LED_NUM; i++)
+    for (i = 0; i < led_num_; i++)
     {
         gpio_config_t io_conf;
         // disable interrupt
@@ -50,6 +45,16 @@ void led_init(void)
     }
 
     is_init = true;
+    if (led_test())
+    {
+        ESP_LOGI(FISHBOT_MODLUE, "init success!");
+        return true;
+    }
+    else
+    {
+        ESP_LOGE(FISHBOT_MODLUE, "init failed!");
+        return false;
+    }
 }
 bool led_test(void)
 {
@@ -61,25 +66,25 @@ bool led_test(void)
     return is_init;
 }
 
-void led_set(led_t led, bool value)
+void led_set(uint8_t id, bool value)
 {
-    if (led > LED_NUM || led == LED_NUM)
+    if (id > led_num_ || id == led_num_)
     {
         return;
     }
 
-    if (led_polarity[led] == LED_POL_NEG)
+    if (led_config_[id].led_polarity == LED_POL_NEG)
     {
         value = !value;
     }
 
     if (value)
     {
-        gpio_set_level(led_pin[led], 1);
+        gpio_set_level(led_config_[id].led_pin, 1);
     }
     else
     {
-        gpio_set_level(led_pin[led], 0);
+        gpio_set_level(led_config_[id].led_pin, 0);
     }
 }
 

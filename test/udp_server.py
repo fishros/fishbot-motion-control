@@ -44,8 +44,8 @@ class UdpServer:
             data, self.addr = self.socket.recvfrom(1024)
             if not data: continue
             frames += data
-            first = frames.find(b'\x7D')
-            last = frames.find(b'\x7E')
+            first = frames.find(b'START|')
+            last = frames.find(b'|END')
             if first != -1 and last != -1:
                 if last < first:
                     frames = frames[last + 1:]
@@ -92,8 +92,8 @@ if __name__ == '__main__':
             frame = queue.get()
             print(frame)
             
-            spped_left = frame[4:6]
-            print("spped_left check sum:", spped_left)
-            spped_left = struct.unpack("h",spped_left)[0]/1000.0
+            # spped_left = frame[4:6]
+            # print("spped_left check sum:", spped_left)
+            # spped_left = struct.unpack("h",spped_left)[0]/1000.0
             
-            print("unpanck:",spped_left)
+            # print("unpanck:",spped_left)

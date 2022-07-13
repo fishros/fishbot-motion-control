@@ -9,15 +9,15 @@
 
 #define FISHBOT_MODLUE "FISHBOT"
 
-static fishbot_config_t fishbot_config = {
-    .driver_version = "fbmcd.v1.0.0.220703",
-    .hardware_version = "fbmch.v1.0.0.220721",
-    .motors_num = 2,
-};
+#define FISHBOT_ERROR_CHECK(MODULE, RESULT) \
+    if (RESULT)                             \
+        ESP_LOGI(MODULE, "init success~!"); \
+    else                                    \
+        ESP_LOGE(MODULE, "init failed~!");
 
 bool fishbot_init(void)
 {
-    fishbot_configurate_init(&fishbot_config);
+    fishbot_config_init();
     ESP_LOGI(FISHBOT_MODLUE, "fishbot init with %s:%s", fishbot_config_get_driver_version(), fishbot_config_get_hardware_version());
     if (!fishbot_init_hardware())
         return false;
@@ -25,40 +25,36 @@ bool fishbot_init(void)
     return true;
 }
 
-bool fishbot_task_start(void)
+bool fishbot_task_init(void)
 {
     led_task_init();
-    //motor_task_init(); //电机功能
-    uart_protocol_init();
-    return true;
-}
-bool fishbot_configurate_init(const fishbot_config_t *config)
-{
-    // TODO(小鱼) 从flash读取配置
+    motor_task_init(); //电机功能
+    protocol_task_init();
     return true;
 }
 
 bool fishbot_init_hardware(void)
 {
-    led_init();
-    if (!led_test())
+    if (!led_init())
         return false;
     if (!motor_init())
         return false;
+    if (!i2c_device_init())
+        return false;
+    if (!oled_init())
+        return false;
+    // if (!mpu6050_init())
+        // return false;
+    if (!wifi_init())
+        return false;
+    if (!protocol_init())
+        return false;
+        
+    char host[16];
+    if (get_wifi_ip(host) != WIFI_STATUS_STA_DISCONECTED)
+    {
+        oled_show_ascii_auto_line(" WIFI SUCCESS ");
+        oled_show_ascii_auto_line(host);
+    }
     return true;
-}
-
-const fishbot_config_t *fishbot_get_configuration(void)
-{
-    return &fishbot_config;
-}
-
-const char *fishbot_config_get_driver_version(void)
-{
-    return fishbot_config.driver_version;
-}
-
-const char *fishbot_config_get_hardware_version()
-{
-    return fishbot_config.hardware_version;
 }
