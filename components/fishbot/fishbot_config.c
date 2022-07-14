@@ -24,9 +24,9 @@ static led_config_t led_configs[] = {
 static pid_ctrl_config_t pid_config[] = {
     {
         .init_param = {
-            .kp = 300,
-            .ki = 0,
-            .kd = 200,
+            .kp = 50,
+            .ki = 10 ,
+            .kd = 0,
             .max_output = 8000,
             .min_output = -8000,
             .max_integral = 2000,
@@ -36,9 +36,9 @@ static pid_ctrl_config_t pid_config[] = {
     },
     {
         .init_param = {
-            .kp = 300,
+            .kp = 100,
             .ki = 0,
-            .kd = 200,
+            .kd = 0,
             .max_output = 8000,
             .min_output = -8000,
             .max_integral = 2000,
@@ -83,7 +83,7 @@ fishbot_wifi_config_t wifi_config = {
 };
 
 protocol_config_t protocol_config = {
-    .mode = MODE_USB,
+    .mode = MODE_WIFI_UDP_PC,
 };
 
 bool fishbot_config_init()
@@ -95,6 +95,9 @@ bool fishbot_config_init()
     // usb 模式也开启wifi,通过手机查看日志信息和控制机器人
     set_wifi_config(&wifi_config);
     set_protocol_config(&protocol_config);
+
+    /*注册pid更新回调函数*/
+    proto_register_update_pid_fun(update_motor_pid_param);
     return true;
 }
 

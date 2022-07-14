@@ -10,13 +10,20 @@
 
 #define FISHBOT_MODLUE "MOTOR"
 
-#define UPDATE_OUTPUT(motor_id, output)                                          \
-    if (output > 0)                                                              \
-    {                                                                            \
-        gpio_set_level(motor_config_[motor_id].io_positive, 1);                  \
-        gpio_set_level(motor_config_[motor_id].io_negative, 0);                  \
-        ledc_set_duty(LEDC_HIGH_SPEED_MODE, ledc_channel_map[motor_id], output); \
-        ledc_update_duty(LEDC_HIGH_SPEED_MODE, ledc_channel_map[motor_id]);      \
+#define UPDATE_OUTPUT(motor_id, output)                                                    \
+    if (output > 0)                                                                        \
+    {                                                                                      \
+        gpio_set_level(motor_config_[motor_id].io_positive, 1);                            \
+        gpio_set_level(motor_config_[motor_id].io_negative, 0);                            \
+        ledc_set_duty(LEDC_HIGH_SPEED_MODE, ledc_channel_map[motor_id], (int)output);      \
+        ledc_update_duty(LEDC_HIGH_SPEED_MODE, ledc_channel_map[motor_id]);                \
+    }                                                                                      \
+    else                                                                                   \
+    {                                                                                      \
+        gpio_set_level(motor_config_[motor_id].io_positive, 0);                            \
+        gpio_set_level(motor_config_[motor_id].io_negative, 1);                            \
+        ledc_set_duty(LEDC_HIGH_SPEED_MODE, ledc_channel_map[motor_id], -1 * (int)output); \
+        ledc_update_duty(LEDC_HIGH_SPEED_MODE, ledc_channel_map[motor_id]);                \
     }
 
 /*configs*/
@@ -24,10 +31,11 @@ static uint8_t motor_num_ = 0;
 static pid_ctrl_config_t *pid_config_ = 0;
 static motor_config_t *motor_config_ = 0;
 static uint8_t ledc_channel_map[] = {LEDC_CHANNEL_0, LEDC_CHANNEL_1, LEDC_CHANNEL_2, LEDC_CHANNEL_3};
-/* PID\编码器 */
-static pid_ctrl_block_handle_t pid_ctrl_block_handle_[MAX_MOTOR_NUM];
-// static uint8_t *ledc_channel_[MAX_MOTOR_NUM];
-static rotary_encoder_t *rotary_encoder_[MAX_MOTOR_NUM];
+
+static pid_ctrl_block_handle_t pid_ctrl_block_handle_[MAX_MOTOR_NUM]; // PID控制结构体
+static rotary_encoder_t *rotary_encoder_[MAX_MOTOR_NUM];              // 编码器配置
+static int32_t target_speeds[MAX_MOTOR_NUM] = {100, 0};               // 电机当前速度，单位mm/s
+static uint16_t tick_to_mms[MAX_MOTOR_NUM] = {62.011394, 62.011394};  // 电机的编码器和距离换算出的值
 
 bool set_motor_config(uint8_t motor_num, motor_config_t *motor_configs, pid_ctrl_config_t *pid_configs)
 {
@@ -37,7 +45,7 @@ bool set_motor_config(uint8_t motor_num, motor_config_t *motor_configs, pid_ctrl
     return true;
 }
 
-uint8_t update_pid_params(proto_pid_data_t *proto_pid_data)
+uint8_t update_motor_pid_param(proto_pid_data_t *proto_pid_data)
 {
     // pid_update_parameters(pid_ctrl_block_handle_[0],);
     return true;
@@ -91,36 +99,47 @@ bool motor_init(void)
         // pid 配置初始化
         pid_new_control_block(pid_config_ + i, pid_ctrl_block_handle_ + i);
     }
-    /*注册pid更新回调函数*/
-    proto_register_update_pid_fun(update_pid_params);
+
     ESP_LOGI(FISHBOT_MODLUE, "init success!");
     return true;
 }
 
-static int32_t last_time_mm;
-static int32_t current_time_mm;
-static uint16_t delta_time_mm;
-static int32_t tick_count[MAX_MOTOR_NUM];
 static void motor_task(void *param)
 {
-    uint8_t i;
-    // float spped_left, spped_right = 0;
-    delta_time_mm = 0;
+    static uint8_t i = 0;
+    static uint16_t last_time_mm = 0;              //上一次的时间
+    static uint16_t current_time_mm = 0;           //当前时间
+    static uint16_t delta_time_mm = 0;             // 间隔时间
+    static int32_t tick_count[MAX_MOTOR_NUM];      // 编码器tick数
+    static int32_t last_tick_count[MAX_MOTOR_NUM]; // 上一轮编码器tick数
+    static int32_t current_speeds[MAX_MOTOR_NUM];  // 电机当前速度，单位mm/s
+    static float output_pwm_[MAX_MOTOR_NUM];       //输出的PWM值
+
     last_time_mm = xTaskGetTickCount();
-    current_time_mm = xTaskGetTickCount();
     while (1)
     {
+        vTaskDelay(pdMS_TO_TICKS(20));
+        current_time_mm = xTaskGetTickCount();
+        delta_time_mm = current_time_mm - last_time_mm;
+        last_time_mm = current_time_mm;
         for (i = 0; i < motor_num_; i++)
         {
-            delta_time_mm = last_time_mm - xTaskGetTickCount();
-            // update ecoder
+            // update current data ecoder
             tick_count[i] = rotary_encoder_[i]->get_counter_value(rotary_encoder_[i]);
-            // ESP_LOGI(FISHBOT_MODLUE, "tick %d:%d", i, tick);
-            // calcute speed
-            UPDATE_OUTPUT(i, 2000);
+            // 当前轮子转一圈产生3293个脉冲（tick），轮子直径65mm  65*3.1415926mm/3293tick= 0.062011394
+            current_speeds[i] = (tick_count[i] - last_tick_count[i]) * tick_to_mms[i] / delta_time_mm;
+            // ESP_LOGI(FISHBOT_MODLUE, "motor[%d]  tick[%d]  delta_time_mm[%d] current_speeds[%d]",
+            //          i, (tick_count[i] - last_tick_count[i]), delta_time_mm, current_speeds[i]);
             // update pid
+            pid_compute(pid_ctrl_block_handle_[i], target_speeds[i] - current_speeds[i], output_pwm_ + i);
+            // ESP_LOGI(FISHBOT_MODLUE, "motor[%d]  target_speeds[%d]  current_speeds[%d] output_pwm_[%f]",
+            //          i, target_speeds[i], current_speeds[i], output_pwm_[i]);
             // update output
-            vTaskDelay(pdMS_TO_TICKS(20));
+            // UPDATE_OUTPUT(i, -2000.0);
+            // int16_t output = output_pwm_[i];
+            UPDATE_OUTPUT(i, output_pwm_[i]);
+            // update last data
+            last_tick_count[i] = tick_count[i];
         }
     }
     vTaskDelete(NULL);
