@@ -36,6 +36,7 @@ static pid_ctrl_block_handle_t pid_ctrl_block_handle_[MAX_MOTOR_NUM]; // PID控�
 static rotary_encoder_t *rotary_encoder_[MAX_MOTOR_NUM];              // 编码器配置
 static int32_t target_speeds[MAX_MOTOR_NUM] = {100, 0};               // 电机当前速度，单位mm/s
 static uint16_t tick_to_mms[MAX_MOTOR_NUM] = {62.011394, 62.011394};  // 电机的编码器和距离换算出的值
+static proto_motor_encoder_data_t proto_motor_encoder_data_;          // 上传存储的编码器数据
 
 bool set_motor_config(uint8_t motor_num, motor_config_t *motor_configs, pid_ctrl_config_t *pid_configs)
 {
@@ -138,9 +139,11 @@ static void motor_task(void *param)
             // UPDATE_OUTPUT(i, -2000.0);
             // int16_t output = output_pwm_[i];
             UPDATE_OUTPUT(i, output_pwm_[i]);
+            proto_motor_encoder_data_.motor_encoder[i] = tick_count[i];
             // update last data
             last_tick_count[i] = tick_count[i];
         }
+        proto_set_motor_encoder_data(&proto_motor_encoder_data_);
     }
     vTaskDelete(NULL);
 }

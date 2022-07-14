@@ -47,9 +47,29 @@ typedef struct
 } protocol_config_t;
 
 
-
+/**
+ * @brief 设置协议模块配置
+ * 
+ * @param protocol_config* 配置指针
+ * @return true 
+ * @return false 
+ */
 bool set_protocol_config(protocol_config_t *protocol_config);
+
+/**
+ * @brief 协议模块初始化
+ * 
+ * @return true 
+ * @return false 
+ */
 bool protocol_init(void);
+
+/**
+ * @brief 协议任务初始化
+ * 
+ * @return true 
+ * @return false 
+ */
 bool protocol_task_init(void);
 
 #endif // _PROTOCOL_H_

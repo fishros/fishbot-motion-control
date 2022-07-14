@@ -53,7 +53,7 @@ typedef struct
  */
 typedef struct
 {
-    uint32_t motor_encoder[MAX_MOTOR_NUM]; // 电机的编码器数据
+    int32_t motor_encoder[MAX_MOTOR_NUM]; // 电机的编码器数据
 } proto_motor_encoder_data_t;
 
 /**
@@ -75,6 +75,13 @@ typedef struct
     float gyro[3];  // 重力加速度
     float quat[4];  // 四元数 xyzw
 } proto_imu_data_t;
+
+/**
+ * @brief 设置电机的编码器数据
+ *
+ * @param proto_motor_encoder_data
+ */
+void proto_set_motor_encoder_data(proto_motor_encoder_data_t *proto_motor_encoder_data);
 
 /**
  * @brief 定义更新PID数据的钩子
