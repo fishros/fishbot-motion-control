@@ -1,12 +1,5 @@
 #ifndef _UDP_CLIENT_H_
 #define _UDP_CLIENT_H_
-
-#define CONFIG_EXAMPLE_IPV4 y
-#define PORT 3333
-#define KEEPALIVE_IDLE 5
-#define KEEPALIVE_INTERVAL 5
-#define KEEPALIVE_COUNT 3
-
 #include <string.h>
 #include <sys/param.h>
 #include "freertos/FreeRTOS.h"
@@ -21,12 +14,15 @@
 #include "lwip/sockets.h"
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
-
-#include <string.h>
+#include "proto_utils.h"
 
 bool set_udp_client_config();
+
+bool udp_client_protocol_init(xQueueHandle *rx_queue, xQueueHandle *tx_queue);
+
 bool udp_client_protocol_init();
-bool udp_client_protocol_task_init();
+
+bool udp_client_protocol_task_init(void);
 
 /* 该模块需要根据wifi链接情况进行一些额外操作 */
 /* 结构体可直接强转：(char *)&frame*/

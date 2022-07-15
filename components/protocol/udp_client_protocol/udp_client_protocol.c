@@ -1,39 +1,51 @@
 #include "udp_client_protocol.h"
 
-// extern int16_t target_spped_left;
-// extern int16_t target_spped_right;
+#define TX_BUF_SIZE 256 // 串口缓存帧的大小
+#define RX_BUF_SIZE 256 // 串口缓存帧的大小
 
+static xQueueHandle *rx_queue_;
+static xQueueHandle *tx_queue_;
+static bool is_uart_init_ = false;
+static char frame_buffer_tx_[TX_BUF_SIZE];
+static char frame_buffer_rx_[RX_BUF_SIZE];
+static protocol_package_t frame_pack_tx_;
+static protocol_package_t frame_pack_rx_;
 
+#define CONFIG_EXAMPLE_IPV4 y
+#define PORT 3333
+#define KEEPALIVE_IDLE 5
+#define KEEPALIVE_INTERVAL 5
+#define KEEPALIVE_COUNT 3
 
 #define FISHBOT_MODULE "UDP_CLIENT"
 
-uint8_t send_error = 0;
-
-// void send_data(char *data,uint8_t len)
-// {
-//     if(sock>0)
-//     {
-//         // vTaskSuspendAll();
-//         int err = sendto(sock, data, len, 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
-//         // xTaskResumeAll();
-//         if (err < 0 && send_error != 1 ) {
-//             ESP_LOGE(FISHBOT_MODULE, "Error occurred during sending: errno %d ,sock:%d ,send_error:%d", errno, sock,send_error);
-//             if(errno==12) return;
-//             send_error = 1;
-//             while (send_error)
-//             {
-//                 vTaskDelay(2000 / portTICK_PERIOD_MS);
-//                 ESP_LOGE(FISHBOT_MODULE, "Delay wait sockt reconnect! sock:%d",sock);
-//             }
-//         }
-//     }
-// }
-#define HOST_IP_ADDR "192.168.1.102"
+#define HOST_IP_ADDR "192.168.4.2"
 #define PORT 3334
 
-static struct sockaddr_in dest_addr;
+// uint8_t send_error = 0;
+static int8_t is_udp_status_ok = -1;
+
+static struct sockaddr_in dest_addr;            // 目标地址
+static struct sockaddr_storage source_addr;     // 当前地址
+static socklen_t socklen = sizeof(source_addr); // 地址长度
 static int sock = -1;
-bool connect_to_udp_server()
+
+bool udp_client_protocol_init(xQueueHandle *rx_queue, xQueueHandle *tx_queue)
+{
+    rx_queue_ = rx_queue;
+    tx_queue_ = tx_queue;
+    udp_client_protocol_init();
+    return true;
+}
+
+bool udp_client_protocol_task_init(void)
+{
+    // xTaskCreate(udp_client_task, "upd_client", 4096, NULL, 5, NULL);
+    // xTaskCreate(udp_client_task, "upd_client", 4096, NULL, 5, NULL);
+    return true;
+}
+
+bool udp_client_protocol_init()
 {
     dest_addr.sin_addr.s_addr = inet_addr(HOST_IP_ADDR);
     dest_addr.sin_family = AF_INET;
@@ -53,23 +65,41 @@ bool connect_to_udp_server()
     // setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
 
     return true;
+    return true;
 }
 
-static struct sockaddr_storage source_addr; // Large enough for both IPv4 or IPv6
-static socklen_t socklen = sizeof(source_addr);
-
-void udp_client_recv_data()
+static void udp_client_tx_task(void *parameters)
 {
-    int len = 0;
-    // len = recvfrom(sock, rx_buffer, sizeof(rx_buffer) - 1, 0, (struct sockaddr *)&source_addr, &socklen);
-    if (len >= 0)
+    static int16_t tx_bytes_len = 0;
+    while (true)
     {
-        // rx_buffer[len] = 0; // Null-terminate whatever we received and treat like a string
-        // handleData(rx_buffer, len);
-
+        if (is_udp_status_ok == false)
+        {
+            vTaskDelay(20);
+            continue;
+        }
+        if (xQueueReceive(*tx_queue_, &frame_pack_tx_, 5) == pdTRUE)
+        {
+            // tx_bytes_len = uart_write_bytes(UART_PROTOC_NUM, frame_pack_tx_.data, frame_pack_tx_.size);
+            tx_bytes_len = sendto(sock, data, len, 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
+            if (tx_bytes_len < 0)
+            {
+                // TODO() Add Error LOG!
+            }
+        }
     }
 }
 
+static void udp_client_rx_task(void *parameters)
+{
+    // len = recvfrom(sock, rx_buffer, sizeof(rx_buffer) - 1, 0, (struct sockaddr *)&source_addr, &socklen);
+    //             if(send_error){
+    //                 shutdown(sock, 0);
+    //                 close(sock);
+    //                 break;
+    //             }
+    //             vTaskDelay(10 / portTICK_PERIOD_MS);
+}
 
 // static void udp_client_task(void *pvParameters)
 // {
