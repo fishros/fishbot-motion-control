@@ -34,7 +34,7 @@ bool udp_client_protocol_init(xQueueHandle *rx_queue, xQueueHandle *tx_queue)
 {
     rx_queue_ = rx_queue;
     tx_queue_ = tx_queue;
-    udp_client_protocol_init();
+    // udp_client_protocol_init();
     return true;
 }
 
@@ -45,7 +45,10 @@ bool udp_client_protocol_task_init(void)
     return true;
 }
 
-bool udp_client_protocol_init()
+/*
+-p (PORT) -b 460800 --before default_reset --after hard_reset --chip esp32  write_flash --flash_mode dio --flash_size detect --flash_freq 40m 0x1000 build/bootloader/bootloader.bin 0x8000 build/partition_table/partition-table.bin 0x10000 build/main.bin
+*/
+bool udp_client_init()
 {
     dest_addr.sin_addr.s_addr = inet_addr(HOST_IP_ADDR);
     dest_addr.sin_family = AF_INET;
@@ -81,7 +84,7 @@ static void udp_client_tx_task(void *parameters)
         if (xQueueReceive(*tx_queue_, &frame_pack_tx_, 5) == pdTRUE)
         {
             // tx_bytes_len = uart_write_bytes(UART_PROTOC_NUM, frame_pack_tx_.data, frame_pack_tx_.size);
-            tx_bytes_len = sendto(sock, data, len, 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
+            // tx_bytes_len = sendto(sock, data, len, 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
             if (tx_bytes_len < 0)
             {
                 // TODO() Add Error LOG!

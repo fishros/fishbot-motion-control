@@ -32,9 +32,18 @@ typedef enum
  */
 typedef enum
 {
-    DATA_TO_MASTER = 0x01, // 0X01,反馈数据（底盘向主控）
-    DATA_TO_FBMC = 0x02,   // 0X02,命令数据（主控向底盘）
+    DATA_TO_MASTER = 0x01, // 0x01,反馈数据（底盘向主控）
+    DATA_TO_FBMC = 0x02,   // 0x02,命令数据（主控向底盘）
 } proto_data_direction_t;
+
+/**
+ * @brief 数据帧的目标地址
+ *
+ */
+typedef enum
+{
+    DATA_TARGET_ADDR_PC = 0x01, // 0x01 目标地址电脑
+} proto_data_target_addr_t;
 
 /**
  * @brief PID数据结构体
@@ -53,7 +62,10 @@ typedef struct
  */
 typedef struct
 {
-    int32_t motor_encoder[MAX_MOTOR_NUM]; // 电机的编码器数据
+    proto_data_id_t data_id;               // 数据编号ID
+    uint16_t data_len;                     // 数据长度
+    proto_data_direction_t data_direction; // 数据方向
+    int32_t motor_encoder[MAX_MOTOR_NUM];  // 电机的编码器数据
 } proto_motor_encoder_data_t;
 
 /**

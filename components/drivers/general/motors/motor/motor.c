@@ -34,7 +34,7 @@ static uint8_t ledc_channel_map[] = {LEDC_CHANNEL_0, LEDC_CHANNEL_1, LEDC_CHANNE
 
 static pid_ctrl_block_handle_t pid_ctrl_block_handle_[MAX_MOTOR_NUM]; // PID控制结构体
 static rotary_encoder_t *rotary_encoder_[MAX_MOTOR_NUM];              // 编码器配置
-static int32_t target_speeds[MAX_MOTOR_NUM] = {100, 0};               // 电机当前速度，单位mm/s
+static int32_t target_speeds[MAX_MOTOR_NUM] = {-150, 0};               // 电机当前速度，单位mm/s
 static uint16_t tick_to_mms[MAX_MOTOR_NUM] = {62.011394, 62.011394};  // 电机的编码器和距离换算出的值
 static proto_motor_encoder_data_t proto_motor_encoder_data_;          // 上传存储的编码器数据
 
@@ -100,7 +100,7 @@ bool motor_init(void)
         // pid 配置初始化
         pid_new_control_block(pid_config_ + i, pid_ctrl_block_handle_ + i);
     }
-
+    proto_set_motor_encoder_data(&proto_motor_encoder_data_);
     ESP_LOGI(FISHBOT_MODLUE, "init success!");
     return true;
 }
@@ -129,15 +129,8 @@ static void motor_task(void *param)
             tick_count[i] = rotary_encoder_[i]->get_counter_value(rotary_encoder_[i]);
             // 当前轮子转一圈产生3293个脉冲（tick），轮子直径65mm  65*3.1415926mm/3293tick= 0.062011394
             current_speeds[i] = (tick_count[i] - last_tick_count[i]) * tick_to_mms[i] / delta_time_mm;
-            // ESP_LOGI(FISHBOT_MODLUE, "motor[%d]  tick[%d]  delta_time_mm[%d] current_speeds[%d]",
-            //          i, (tick_count[i] - last_tick_count[i]), delta_time_mm, current_speeds[i]);
             // update pid
             pid_compute(pid_ctrl_block_handle_[i], target_speeds[i] - current_speeds[i], output_pwm_ + i);
-            // ESP_LOGI(FISHBOT_MODLUE, "motor[%d]  target_speeds[%d]  current_speeds[%d] output_pwm_[%f]",
-            //          i, target_speeds[i], current_speeds[i], output_pwm_[i]);
-            // update output
-            // UPDATE_OUTPUT(i, -2000.0);
-            // int16_t output = output_pwm_[i];
             UPDATE_OUTPUT(i, output_pwm_[i]);
             proto_motor_encoder_data_.motor_encoder[i] = tick_count[i];
             // update last data

@@ -83,7 +83,7 @@ fishbot_wifi_config_t wifi_config = {
 };
 
 protocol_config_t protocol_config = {
-    .mode = MODE_WIFI_UDP_PC,
+    .mode = MODE_USB,
 };
 
 bool fishbot_config_init()
@@ -95,7 +95,6 @@ bool fishbot_config_init()
     // usb 模式也开启wifi,通过手机查看日志信息和控制机器人
     set_wifi_config(&wifi_config);
     set_protocol_config(&protocol_config);
-
     /*注册pid更新回调函数*/
     proto_register_update_pid_fun(update_motor_pid_param);
     return true;
