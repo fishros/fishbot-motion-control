@@ -10,7 +10,7 @@
 static fishbot_config_t fishbot_config = {
     .driver_version = "fbmcd.v1.0.0.220703",
     .hardware_version = "fbmch.v1.0.0.220721",
-    .motors_num = 2,
+    .motors_num = 1,
 };
 
 static led_config_t led_configs[] = {
@@ -52,24 +52,24 @@ static motor_config_t motor_configs[] = {
     {
         .motor_id = 0,
         .io_pwm = 4,
-        .io_positive = 22,
-        .io_negative = 23,
-        .io_encoder_positive = 32,
-        .io_encoder_negative = 33,
+        .io_positive = 39,
+        .io_negative = 40,
+        .io_encoder_positive = 41,
+        .io_encoder_negative = 42,
     },
     {
         .motor_id = 1,
         .io_pwm = 5,
-        .io_positive = 13,
-        .io_negative = 12,
-        .io_encoder_positive = 25,
-        .io_encoder_negative = 26,
+        .io_positive = 44,
+        .io_negative = 45,
+        .io_encoder_positive = 13,
+        .io_encoder_negative = 14,
     },
 };
 
 i2c_device_config_t i2c_device_config = {
-    .scl_pin = 19,
-    .sda_pin = 18,
+    .scl_pin = 11,
+    .sda_pin = 10,
     .i2c_num = I2C_NUM_0,
 };
 

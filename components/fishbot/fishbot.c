@@ -41,10 +41,10 @@ bool fishbot_init_hardware(void)
         return false;
     if (!i2c_device_init())
         return false;
-    if (!oled_init())
-        return false;
+    // if (!oled_init())
+    //     return false;
     // if (!mpu6050_init())
-        // return false;
+    //     return false;
     if (!wifi_init())
         return false;
     if (!protocol_init())

@@ -8,22 +8,29 @@
  */
 #include "motor.h"
 
-#define FISHBOT_MODLUE "MOTOR"
+#define FISHBOT_MODLUE "MOTORH"
+// support esp32-s2
+#if SOC_LEDC_SUPPORT_HS_MODE
+    #define MOTOR_PWM_MODE LEDC_HIGH_SPEED_MODE
+#endif
+#ifndef MOTOR_PWM_MODE
+    #define MOTOR_PWM_MODE LEDC_LOW_SPEED_MODE
+#endif
 
-#define UPDATE_OUTPUT(motor_id, output)                                                    \
-    if (output > 0)                                                                        \
-    {                                                                                      \
-        gpio_set_level(motor_config_[motor_id].io_positive, 1);                            \
-        gpio_set_level(motor_config_[motor_id].io_negative, 0);                            \
-        ledc_set_duty(LEDC_HIGH_SPEED_MODE, ledc_channel_map[motor_id], (int)output);      \
-        ledc_update_duty(LEDC_HIGH_SPEED_MODE, ledc_channel_map[motor_id]);                \
-    }                                                                                      \
-    else                                                                                   \
-    {                                                                                      \
-        gpio_set_level(motor_config_[motor_id].io_positive, 0);                            \
-        gpio_set_level(motor_config_[motor_id].io_negative, 1);                            \
-        ledc_set_duty(LEDC_HIGH_SPEED_MODE, ledc_channel_map[motor_id], -1 * (int)output); \
-        ledc_update_duty(LEDC_HIGH_SPEED_MODE, ledc_channel_map[motor_id]);                \
+#define UPDATE_OUTPUT(motor_id, output)                                              \
+    if (output > 0)                                                                  \
+    {                                                                                \
+        gpio_set_level(motor_config_[motor_id].io_positive, 1);                      \
+        gpio_set_level(motor_config_[motor_id].io_negative, 0);                      \
+        ledc_set_duty(MOTOR_PWM_MODE, ledc_channel_map[motor_id], (int)output);      \
+        ledc_update_duty(MOTOR_PWM_MODE, ledc_channel_map[motor_id]);                \
+    }                                                                                \
+    else                                                                             \
+    {                                                                                \
+        gpio_set_level(motor_config_[motor_id].io_positive, 0);                      \
+        gpio_set_level(motor_config_[motor_id].io_negative, 1);                      \
+        ledc_set_duty(MOTOR_PWM_MODE, ledc_channel_map[motor_id], -1 * (int)output); \
+        ledc_update_duty(MOTOR_PWM_MODE, ledc_channel_map[motor_id]);                \
     }
 
 /*configs*/
@@ -34,7 +41,7 @@ static uint8_t ledc_channel_map[] = {LEDC_CHANNEL_0, LEDC_CHANNEL_1, LEDC_CHANNE
 
 static pid_ctrl_block_handle_t pid_ctrl_block_handle_[MAX_MOTOR_NUM]; // PID控制结构体
 static rotary_encoder_t *rotary_encoder_[MAX_MOTOR_NUM];              // 编码器配置
-static int32_t target_speeds[MAX_MOTOR_NUM] = {-150, 0};               // 电机当前速度，单位mm/s
+static int32_t target_speeds[MAX_MOTOR_NUM] = {-150, 0};              // 电机当前速度，单位mm/s
 static uint16_t tick_to_mms[MAX_MOTOR_NUM] = {62.011394, 62.011394};  // 电机的编码器和距离换算出的值
 static proto_motor_encoder_data_t proto_motor_encoder_data_;          // 上传存储的编码器数据
 
@@ -66,7 +73,7 @@ bool motor_init(void)
     ledc_timer_config_t ledc_timer = {
         .duty_resolution = LEDC_TIMER_13_BIT, // resolution of PWM duty
         .freq_hz = 5000,                      // frequency of PWM signal
-        .speed_mode = LEDC_HIGH_SPEED_MODE,   // timer mode
+        .speed_mode = MOTOR_PWM_MODE,         // timer mode
         .timer_num = LEDC_TIMER_0,            // timer index
         .clk_cfg = LEDC_AUTO_CLK,             // Auto select the source clock
     };
@@ -92,7 +99,7 @@ bool motor_init(void)
             .channel = ledc_channel_map[i],
             .duty = 0,
             .gpio_num = motor_config_[i].io_pwm,
-            .speed_mode = LEDC_HIGH_SPEED_MODE,
+            .speed_mode = MOTOR_PWM_MODE,
             .hpoint = 0,
             .timer_sel = LEDC_TIMER_0,
         };

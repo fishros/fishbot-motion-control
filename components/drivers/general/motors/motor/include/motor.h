@@ -22,7 +22,9 @@
 #include "driver/gpio.h"
 #include "protocol.h"
 
+#ifndef MAX_MOTOR_NUM
 #define MAX_MOTOR_NUM 4
+#endif
 
 typedef struct
 {
