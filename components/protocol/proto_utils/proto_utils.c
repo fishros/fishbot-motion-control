@@ -50,7 +50,6 @@ int escape_frame(uint8_t *frame, uint8_t *result, int len)
     result[j++] = FIRST_CODE;
     for (i = 1; i < len - 1; i++)
     {
-        printf("0x%02X-", frame[i]);
         if (frame[i] == 0x5A)
         {
             result[j++] = 0x50;
@@ -105,5 +104,5 @@ void print_frame_to_hex(uint8_t *title, uint8_t *buffer, uint16_t size)
             printf("\n");
         }
     }
-    printf("*************************end %s*******************************\n", title);
+    printf("\n*************************end %s*******************************\n", title);
 }
