@@ -26,6 +26,7 @@ bool protocol_init()
   else if (protocol_config_->mode == MODE_WIFI_UDP_PC)
   {
     // udp_client_init
+    
   }
 
   return true;
@@ -46,7 +47,7 @@ void proto_upload_data_task(void *param)
   {
     proto_get_upload_frame(&protocol_package);
     xQueueSend(data_tx_queue_,protocol_package, 2 / portTICK_RATE_MS);
-    vTaskDelay(1000 / portTICK_RATE_MS);
+    vTaskDelay(20 / portTICK_RATE_MS);
   }
 }
 
