@@ -34,7 +34,7 @@ uint16_t get_encoder_data(uint8_t *frame_data)
 
     proto_data_header_t proto_data_header;
     proto_data_header.data_id = DATA_ENCODER;
-    proto_data_header.data_len = data_header_len;
+    proto_data_header.data_len = data_content_len;
     proto_data_header.data_direction = DATA_TO_MASTER;
 
     // copy
@@ -42,8 +42,8 @@ uint16_t get_encoder_data(uint8_t *frame_data)
     memcpy(frame_data + data_header_len, proto_motor_encoder_data_,
            sizeof(proto_motor_encoder_data_t));
 
-    printf("header_size:%d,data_size:%d\n", data_header_len,
-           sizeof(proto_motor_encoder_data_t));
+    // printf("header_size:%d,data_size:%d\n", data_header_len,
+    //        sizeof(proto_motor_encoder_data_t));
     return data_header_len + sizeof(proto_motor_encoder_data_t);
 }
 
@@ -58,15 +58,18 @@ uint16_t proto_get_upload_frame(protocol_package_t **protocol_package)
     static uint16_t frame_len = 0;                // 完整的帧的长度
     static uint8_t data_frame_size = 1;           // 数据帧的个数，电机、IMU各算一个
     // 获取传感器数据|编码器数据
-    data_frame_len = get_encoder_data(frame_data);
-    // print_frame_to_hex((uint8_t *)"data", frame_data, data_frame_len);
+    // 数据域第一位表示数据的数量，目前仅编码器一个数据
+    data_frame_len = 0;
+    frame_data[data_frame_len++] = data_frame_size;
+    data_frame_len += get_encoder_data(frame_data+1);
     // 对数据域进行CRC16校验，生成校验码
-    crc_result = crc16(frame_data, data_frame_len); //结尾应该被多补了一个NULL
+    crc_result = crc16(frame_data, data_frame_len); 
+
     frame_len = 0;
     frame[frame_len++] = FIRST_CODE;
     frame[frame_len++] = frame_index++;
     frame[frame_len++] = DATA_TARGET_ADDR_PC;
-    frame[frame_len++] = data_frame_size;
+    // frame[frame_len++] = data_frame_size;
     memcpy(frame + frame_len, frame_data, data_frame_len);
     frame_len += data_frame_len;
     // 小端模式: 高位在前(低内存)，低位在后(高内存)
@@ -76,8 +79,8 @@ uint16_t proto_get_upload_frame(protocol_package_t **protocol_package)
     // 对数据帧进行转义
     protocol_package_.size =
         escape_frame(frame, protocol_package_.data, frame_len);
-    print_frame_to_hex((uint8_t *)"frame", protocol_package_.data,
-                       protocol_package_.size);
+    // print_frame_to_hex((uint8_t *)"frame", protocol_package_.data,
+    //                    protocol_package_.size);
     *protocol_package = &protocol_package_;
     return (*protocol_package)->size;
 }

@@ -47,6 +47,7 @@ void proto_upload_data_task(void *param)
   {
     proto_get_upload_frame(&protocol_package);
     xQueueSend(data_tx_queue_,protocol_package, 2 / portTICK_RATE_MS);
+    // 20ms加上串口延时，串口通信可以达到30HZ以上
     vTaskDelay(20 / portTICK_RATE_MS);
   }
 }
