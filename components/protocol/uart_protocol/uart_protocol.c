@@ -16,7 +16,6 @@
 
 #define UART_PROTOC_NUM UART_USB_NUM
 
-
 #define TX_BUF_SIZE 256 // 串口缓存帧的大小
 #define RX_BUF_SIZE 256 // 串口缓存帧的大小
 
@@ -42,11 +41,13 @@ void uart_init(void)
     // 发送数据用CP2101
     uart_driver_install(UART_USB_NUM, RX_BUF_SIZE * 2, 0, 0, NULL, 0);
     uart_param_config(UART_USB_NUM, &uart_config);
-    uart_set_pin(UART_USB_NUM, TXD_CP2102_PIN, RXD_CP2102_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+    uart_set_pin(UART_USB_NUM, TXD_CP2102_PIN, RXD_CP2102_PIN, UART_PIN_NO_CHANGE,
+                 UART_PIN_NO_CHANGE);
     // 日志放到日志另外引脚打印出来
     uart_driver_install(UART_LOG_NUM, RX_BUF_SIZE * 2, 0, 0, NULL, 0);
     uart_param_config(UART_LOG_NUM, &uart_config);
-    uart_set_pin(UART_LOG_NUM, TXD_LOG_PIN, RXD_LOG_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+    uart_set_pin(UART_LOG_NUM, TXD_LOG_PIN, RXD_LOG_PIN, UART_PIN_NO_CHANGE,
+                 UART_PIN_NO_CHANGE);
 }
 
 bool uart_protocol_init(xQueueHandle *rx_queue, xQueueHandle *tx_queue)
@@ -71,7 +72,8 @@ static void uart_tx_task(void *pvParameters)
         }
         if (xQueueReceive(*tx_queue_, &frame_pack_tx_, 5) == pdTRUE)
         {
-            tx_bytes_len = uart_write_bytes(UART_PROTOC_NUM, frame_pack_tx_.data, frame_pack_tx_.size);
+            tx_bytes_len = uart_write_bytes(UART_PROTOC_NUM, frame_pack_tx_.data,
+                                            frame_pack_tx_.size);
             if (tx_bytes_len <= 0)
             {
                 // TODO() Add Error LOG!
@@ -98,7 +100,8 @@ static void uart_rx_task(void *pvParameters)
             continue;
         }
 
-        rx_bytes_len = uart_read_bytes(UART_PROTOC_NUM, frame_buffer_rx_ + rx_index, RX_BUF_SIZE, 10 / portTICK_RATE_MS);
+        rx_bytes_len = uart_read_bytes(UART_PROTOC_NUM, frame_buffer_rx_ + rx_index,
+                                       RX_BUF_SIZE, 10 / portTICK_RATE_MS);
 
         if (rx_bytes_len <= 0)
         {
@@ -106,6 +109,13 @@ static void uart_rx_task(void *pvParameters)
         }
 
         // 处理数据,将数据分解为一帧帧
+        frame_start_index = -1;
+        frame_end_index = -1;
+#ifdef DEBUG_FISHBOT
+        print_frame_to_hex((uint8_t *)"rxraw",
+                           (uint8_t *)frame_buffer_rx_ + rx_index, rx_bytes_len);
+        printf("rx_index=%d,rx_bytes_len=%d\n", rx_index, rx_bytes_len);
+#endif
         for (i = 0; i < rx_index + rx_bytes_len; i++)
         {
             if (frame_buffer_rx_[i] == 0x5A)
@@ -117,9 +127,16 @@ static void uart_rx_task(void *pvParameters)
                 else
                 {
                     frame_end_index = i;
+                    if (frame_end_index - frame_start_index == 1)
+                    {
+                        frame_start_index = frame_end_index;
+                        frame_end_index = -1;
+                    }
                 }
             }
-
+#ifdef DEBUG_FISHBOT
+            printf("start=%d,end=%d,i=%d\n", frame_start_index, frame_end_index, i);
+#endif
             if (frame_end_index != -1 && frame_start_index != -1)
             {
                 frame_pack_rx_.size = frame_end_index - frame_start_index + 1;
@@ -141,7 +158,9 @@ static void uart_rx_task(void *pvParameters)
 
 bool uart_protocol_task_init(void)
 {
-    xTaskCreate(uart_rx_task, "uart_rx_task", 1024 * 2, NULL, 5, NULL); //接收任务
-    xTaskCreate(uart_tx_task, "uart_tx_task", 1024 * 2, NULL, 4, NULL); //发送任务
+    xTaskCreate(uart_rx_task, "uart_rx_task", 1024 * 2, NULL, 5,
+                NULL); //接收任务
+    xTaskCreate(uart_tx_task, "uart_tx_task", 1024 * 2, NULL, 4,
+                NULL); //发送任务
     return true;
 }

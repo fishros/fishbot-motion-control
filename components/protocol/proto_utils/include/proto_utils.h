@@ -8,6 +8,16 @@
 #define END_CODE 0x5A
 #define TARGET_ADD 0x01
 
+
+/**
+ * @brief 截取指定位数据并赋值
+ *        小端模式: 高位在前(低内存)，低位在后(高内存)
+ *
+ */
+#define SET_SUB_BYTES1(target, data) target = (data & 0xFF)
+#define SET_SUB_BYTES2(target, data) target |= ((data << 8) & 0xFF00)
+
+
 /* Structure used for in/out data via USB */
 typedef struct
 {
