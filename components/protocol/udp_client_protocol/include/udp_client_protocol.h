@@ -16,7 +16,7 @@
 #include <lwip/netdb.h>
 #include "proto_utils.h"
 
-bool set_udp_client_config();
+bool set_udp_client_config(mode_wifi_udp_pc_config_t *udp_pc_config_t);
 
 bool udp_client_protocol_init(xQueueHandle *rx_queue, xQueueHandle *tx_queue);
 
@@ -25,6 +25,7 @@ bool udp_client_protocol_init();
 bool udp_client_protocol_task_init(void);
 
 /* 该模块需要根据wifi链接情况进行一些额外操作 */
-/* 结构体可直接强转：(char *)&frame*/
+
+bool update_udp_server_config();
 
 #endif // _UDP_CLIENT_H_

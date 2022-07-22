@@ -20,7 +20,7 @@ static protocol_package_t frame_pack_rx_;
 #define FISHBOT_MODULE "UDP_CLIENT"
 
 #define HOST_IP_ADDR "192.168.4.2"
-#define PORT 3334
+#define PORT 3474
 
 // uint8_t send_error = 0;
 static int8_t is_udp_status_ok = -1;
@@ -29,6 +29,9 @@ static struct sockaddr_in dest_addr;            // 目标地址
 static struct sockaddr_storage source_addr;     // 当前地址
 static socklen_t socklen = sizeof(source_addr); // 地址长度
 static int sock = -1;
+
+
+bool set_udp_client_config(mode_wifi_udp_pc_config_t *udp_pc_config_t);
 
 bool udp_client_protocol_init(xQueueHandle *rx_queue, xQueueHandle *tx_queue)
 {
@@ -45,9 +48,7 @@ bool udp_client_protocol_task_init(void)
     return true;
 }
 
-/*
--p (PORT) -b 460800 --before default_reset --after hard_reset --chip esp32  write_flash --flash_mode dio --flash_size detect --flash_freq 40m 0x1000 build/bootloader/bootloader.bin 0x8000 build/partition_table/partition-table.bin 0x10000 build/main.bin
-*/
+
 bool udp_client_init()
 {
     dest_addr.sin_addr.s_addr = inet_addr(HOST_IP_ADDR);
@@ -66,8 +67,6 @@ bool udp_client_init()
     // ioctlsocket(sock, FIONBIO, &non_blocking);
     //设置为非阻塞
     // setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
-
-    return true;
     return true;
 }
 
@@ -95,13 +94,16 @@ static void udp_client_tx_task(void *parameters)
 
 static void udp_client_rx_task(void *parameters)
 {
+   while (true)
+   {
     // len = recvfrom(sock, rx_buffer, sizeof(rx_buffer) - 1, 0, (struct sockaddr *)&source_addr, &socklen);
     //             if(send_error){
     //                 shutdown(sock, 0);
     //                 close(sock);
     //                 break;
     //             }
-    //             vTaskDelay(10 / portTICK_PERIOD_MS);
+       vTaskDelay(10 / portTICK_PERIOD_MS);
+   }
 }
 
 // static void udp_client_task(void *pvParameters)

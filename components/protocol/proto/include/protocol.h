@@ -43,7 +43,7 @@ typedef struct
 {
     fishbot_mode_t mode;
     mode_wifi_udp_pc_config_t wifi_udp_pc_config;
-    mode_usb_config_t udp_config;
+    mode_usb_config_t usb_uart_pc_config;
 } protocol_config_t;
 
 
@@ -55,6 +55,15 @@ typedef struct
  * @return false 
  */
 bool set_protocol_config(protocol_config_t *protocol_config);
+
+/**
+ * @brief 更新通信配置
+ * 
+ * @param protocol_config 
+ * @return true 
+ * @return false 
+ */
+bool update_protocol_config(protocol_config_t *protocol_config);
 
 /**
  * @brief 协议模块初始化
