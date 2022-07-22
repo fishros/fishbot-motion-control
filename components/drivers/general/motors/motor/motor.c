@@ -39,7 +39,7 @@ static pid_ctrl_block_handle_t
     pid_ctrl_block_handle_[MAX_MOTOR_NUM];               // PID控制结构体
 static rotary_encoder_t *rotary_encoder_[MAX_MOTOR_NUM]; // 编码器配置
 static int16_t target_speeds[MAX_MOTOR_NUM] = {-50,
-                                               0}; // 电机当前速度，单位mm/s
+                                               50}; // 电机当前速度，单位mm/s
 static uint16_t tick_to_mms[MAX_MOTOR_NUM] = {
     62.011394, 62.011394}; // 电机的编码器和距离换算出的值
 static proto_motor_encoder_data_t

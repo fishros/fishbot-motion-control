@@ -38,8 +38,8 @@ static pid_ctrl_config_t pid_config[] = {
     {
         .init_param =
             {
-                .kp = 100,
-                .ki = 0,
+                .kp = 50,
+                .ki = 10,
                 .kd = 0,
                 .max_output = 8000,
                 .min_output = -8000,
@@ -76,8 +76,8 @@ i2c_device_config_t i2c_device_config = {
 };
 
 fishbot_wifi_config_t wifi_config = {
-    .ssid = "fbot",
-    .pswd = "88888888",
+    .ssid = "fishbot",
+    .pswd = "fishros.com",
     .ap_ssid = "fbmc",
     .ap_pswd = "",
     .mode = WIFI_MODE_STA,
