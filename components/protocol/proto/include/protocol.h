@@ -33,11 +33,6 @@ typedef struct
     /* data */
 } mode_wifi_udp_app_config_t;
 
-typedef struct
-{
-    char server_address[16];
-    u_int16_t server_port;
-} mode_wifi_udp_pc_config_t;
 
 typedef struct
 {

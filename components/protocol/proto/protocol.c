@@ -108,7 +108,8 @@ void proto_upload_data_task(void *params) {
   while (true) {
     proto_get_upload_frame(&protocol_package);
     xQueueSend(data_tx_queue_, protocol_package, 2 / portTICK_RATE_MS);
-    // 20ms加上串口延时，串口通信可以达到30HZ以上
+    // 20ms:串口通信可以达到30HZ以上
+    //      UDP帧率
     vTaskDelay(20 / portTICK_RATE_MS);
   }
 }
@@ -118,8 +119,9 @@ bool protocol_task_init(void) {
   if (protocol_config_->mode == MODE_USB) {
     uart_protocol_task_init();
   } else if (protocol_config_->mode == MODE_WIFI_UDP_PC) {
-    // udp_client_init
+    udp_client_protocol_task_init();
   }
+  // 启动数据帧收发任务
   xTaskCreate(proto_upload_data_task, "proto_upload_data_task", 1024 * 2, NULL,
               5, NULL);  //发送任务
   xTaskCreate(proto_deal_data_task, "proto_deal_data_task", 1024 * 2, NULL, 5,
