@@ -33,23 +33,47 @@ typedef struct
     /* data */
 } mode_wifi_udp_app_config_t;
 
-typedef struct
-{
-    char server_address[16];
-    u_int16_t server_port;
-} mode_wifi_udp_pc_config_t;
 
 typedef struct
 {
     fishbot_mode_t mode;
     mode_wifi_udp_pc_config_t wifi_udp_pc_config;
-    mode_usb_config_t udp_config;
+    mode_usb_config_t usb_uart_pc_config;
 } protocol_config_t;
 
 
-
+/**
+ * @brief 设置协议模块配置
+ * 
+ * @param protocol_config* 配置指针
+ * @return true 
+ * @return false 
+ */
 bool set_protocol_config(protocol_config_t *protocol_config);
+
+/**
+ * @brief 更新通信配置
+ * 
+ * @param protocol_config 
+ * @return true 
+ * @return false 
+ */
+bool update_protocol_config(protocol_config_t *protocol_config);
+
+/**
+ * @brief 协议模块初始化
+ * 
+ * @return true 
+ * @return false 
+ */
 bool protocol_init(void);
+
+/**
+ * @brief 协议任务初始化
+ * 
+ * @return true 
+ * @return false 
+ */
 bool protocol_task_init(void);
 
 #endif // _PROTOCOL_H_

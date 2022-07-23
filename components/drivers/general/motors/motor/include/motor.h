@@ -46,6 +46,15 @@ typedef struct
 bool set_motor_config(uint8_t motor_num_, motor_config_t *motor_configs, pid_ctrl_config_t *pid_configs);
 
 /**
+ * @brief 更新PID参数
+ * 
+ * @param proto_pid_data 
+ * @return true 
+ * @return false 
+ */
+uint8_t update_motor_pid_param(proto_pid_data_t *proto_pid_data);
+
+/**
  * @brief 初始化电机，编码器&PWM
  *
  * @return true

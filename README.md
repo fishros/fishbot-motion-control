@@ -5,14 +5,16 @@
 - [x] 电机驱动\编码器计算 
 - [x] OLED驱动与显示
 - [x] WIFI模块
-- [ ] 电机PID控制计算
+- [x] 电机PID控制计算
+- [x] Protocol数据接受及处理实现
+- [x] Protocol数据发送处理及实现
 - [ ] MPU6050任务数据获取及姿态推算
 - [ ] UDP协议收发任务实现
-- [ ] Protocol数据接受及处理实现
-- [ ] Protocol数据发送处理及实现
+- [ ] WIFI短线自动重连
 - [ ] NVS掉电存储模块（WIFI配置、PID配置）
 - [ ] 按键驱动实现（模式切换功能）
 - [ ] 日志模块搭建（支持输出到UDPServer）
+- [ ] 重新分配各个任务的优先级及空间大小
 - [ ] 制定新版本协议（支持模式配置、WIFI配置，增加PID更多参数，冗余电机数量）
 - [ ] 新版本协议WIFI模块实现
 - [ ] 新版本协议PID模块实现
@@ -29,6 +31,8 @@ docker run -it  --rm --privileged -v=/dev:/dev  -v `pwd`:`pwd` -w `pwd` espressi
 ### 烧写
 ```
 docker run -it  --rm --privileged -v=/dev:/dev  -v `pwd`:`pwd` -w `pwd` espressif/idf:release-v4.4 idf.py flash
+# Windows With Docker&WSL
+esptool.py -p /dev/ttyS12 -b 921600  --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 40m --flash_size 4MB 0x1000 bootloader/bootloader.bin 0x10000 main.bin 0x8000 partition_table/partition-table.bin
 ```
 
 
