@@ -2323,4 +2323,47 @@ void mpu6050_madgwick_quaternion_update
     float accel_x, float accel_y, float accel_z,
     float gyro_x, float gyro_y, float gyro_z
 );
+
+
+/**
+ * @brief AHRS算法求欧拉角的四元数
+ * 
+ * @param gx    gyrox_raw /131/57.3
+ * @param gy    gyroy_raw /131/57.3
+ * @param gz    gyroz_raw /131/57.3
+ * @param ax    accelx_raw /16384
+ * @param ay    accely_raw /16384
+ * @param az    accelz_raw /16384
+ */
+void MahonyAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float az) ;
+
+/**
+ * @brief 快速求开根号
+ * 
+ * @param x 
+ * @return float 
+ */
+float invSqrt(float x);
+
+/**
+ * @brief MPU6050任务的初始化函数，包含MPU6050的硬件初始化和计算误差，运行时间大概5s，请不要动mpu6050
+ * 
+ * @param param 
+ * @return true 
+ * @return false 
+ */
+bool mpu6050_task_init();
+
+/**
+ * @brief mpu6050的任务封装
+ * 
+ */
+void mpu6050_task(void);
+
+/**
+ * @brief 计算欧拉角roll，pitch，yaw
+ * 
+ */
+void get_mpu6050_euler_angle(void *param);
+
 #endif
