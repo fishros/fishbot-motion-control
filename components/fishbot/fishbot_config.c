@@ -62,8 +62,8 @@ static motor_config_t motor_configs[] = {
     {
         .motor_id = 1,
         .io_pwm = 5,
-        .io_positive = 13,
-        .io_negative = 12,
+        .io_positive = 12,
+        .io_negative = 13,
         .io_encoder_positive = 25,
         .io_encoder_negative = 26,
     },
