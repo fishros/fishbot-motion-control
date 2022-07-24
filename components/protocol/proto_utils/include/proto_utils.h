@@ -23,7 +23,7 @@ typedef struct
 {
     uint8_t size;
     uint8_t data[RX_TX_PACKET_SIZE];
-} protocol_package_t;
+}  __attribute__((packed)) protocol_package_t;
 
 /**
  * @brief crc16-XMODEM校验

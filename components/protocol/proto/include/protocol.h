@@ -45,7 +45,7 @@ typedef struct
 /**
  * @brief 设置协议模块配置
  * 
- * @param protocol_config* 配置指针
+ * @param protocol_config* 配置指针 
  * @return true 
  * @return false 
  */

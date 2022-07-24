@@ -76,11 +76,10 @@ static void udp_client_tx_task(void *parameters)
         }
         if (xQueueReceive(*tx_queue_, &frame_pack_tx_, 5) == pdTRUE)
         {
+            // print_frame_to_hex((uint8_t*)"raw proto", frame_pack_tx_.data, frame_pack_tx_.size);
             tx_bytes_len = sendto(sock, frame_pack_tx_.data, frame_pack_tx_.size, 0,
                                   (struct sockaddr *)&dest_addr, sizeof(dest_addr));
-            vTaskDelay(1 / portTICK_RATE_MS); // 加上1ms延时
             frame_index_++;
-            //   printf("send data %d\n", frame_index_);
             if (tx_bytes_len < 0)
             {
                 // TODO(小鱼): Add Error LOG!.
@@ -163,9 +162,9 @@ static void udp_client_rx_task(void *parameters)
 
 bool udp_client_protocol_task_init(void)
 {
-    xTaskCreate(udp_client_tx_task, "udp_client_tx_task", 1024 * 2, NULL, 5,
+    xTaskCreate(udp_client_tx_task, "udp_client_tx_task", 1024 * 2, NULL, 7,
                 NULL);
-    xTaskCreate(udp_client_rx_task, "udp_client_rx_task", 1024 * 2, NULL, 5,
+    xTaskCreate(udp_client_rx_task, "udp_client_rx_task", 1024 * 2, NULL, 7,
                 NULL);
     return true;
 }

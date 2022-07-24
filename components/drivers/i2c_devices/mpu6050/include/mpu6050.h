@@ -17,7 +17,7 @@
 #include <math.h>
 #include "esp32_i2c_rw.h"
 #include "mpu6050_registers.h"
-
+#include "protocol.h"
 // Address of MPU6050 (Can be 0x68 or 0x69):
 #define MPU6050_ADDRESS_LOW     0x68 // Address pin low (GND).
 #define MPU6050_ADDRESS_HIGH    0x69 // Address pin high (VCC).
