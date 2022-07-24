@@ -95,8 +95,15 @@ typedef struct
 {
     float accel[3]; // 加速度
     float gyro[3];  // 重力加速度
-    float quat[4];  // 四元数 xyzw
-} proto_imu_data_t;
+    float euler[3]; // 欧拉角 RPY
+} __attribute__((packed))  proto_imu_data_t;
+
+/**
+ * @brief 设置IMU数据
+ *
+ * @param proto_imu_data_t
+ */
+void proto_set_imu_data(proto_imu_data_t *proto_imu_data);
 
 /**
  * @brief 设置电机的编码器数据
@@ -139,14 +146,12 @@ typedef uint8_t (*update_speed_params_fun_t)(
 bool proto_register_update_motor_speed_fun(
     update_speed_params_fun_t *update_motor_speed_ctrl_fun);
 
-
 /**
  * @brief 更新电机目标速度
  *
  * @param motor_speed
  */
 void proto_update_motor_speed(proto_motor_speed_ctrl_data_t *motor_speed);
-
 
 /**
  * @brief 解析和获取一帧数据（根据数据调用不同的钩子完成数据的更新到各个模块）

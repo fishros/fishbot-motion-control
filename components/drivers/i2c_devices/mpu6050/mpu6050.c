@@ -13,8 +13,8 @@
 
 #include "mpu6050.h"
 #include <string.h>
-#include "MadgwickAHRS/MadgwickAHRS.h"
-#include "MahonyAHRS/MahonyAHRS.h"
+// #include "MadgwickAHRS/MadgwickAHRS.h"
+// #include "MahonyAHRS/MahonyAHRS.h"
 
 #define FISHBOT_MODLUE "MPU6050"
 
@@ -26,41 +26,42 @@ const char *TAG_MPU6050 = "MPU6050";
 #define BETA (sqrt(3.0f / 4.0f) * GYRO_MEAS_ERROR)
 #define ZETA (sqrt(3.0f / 4.0f) * GYRO_MEAS_DRIFT)
 
-#define filter_time 3000  //计算偏差的次数
+#define filter_time 3000 //计算偏差的次数
 #define Acc_Gain 16384.0
 #define Gyro_Gain 131.0
 #define gyroCofe 0.98
 #define accCofe 0.02
 //---------AHRS算法所用参数-------
-#define sampleFreq	200.0f			// sample frequency in Hz
-#define twoKpDef	(2.0f * 0.5f)	// 2 * proportional gain
-#define twoKiDef	(2.0f * 0.0f)	// 2 * integral gain
-volatile float twoKp = twoKpDef;											// 2 * proportional gain (Kp)
-volatile float twoKi = twoKiDef;											// 2 * integral gain (Ki)
-volatile float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;					// quaternion of sensor frame relative to auxiliary frame
-volatile float integralFBx = 0.0f,  integralFBy = 0.0f, integralFBz = 0.0f;	// integral error terms scaled by Ki
+#define sampleFreq 200.0f                                                  // sample frequency in Hz
+#define twoKpDef (2.0f * 0.5f)                                             // 2 * proportional gain
+#define twoKiDef (2.0f * 0.0f)                                             // 2 * integral gain
+volatile float twoKp = twoKpDef;                                           // 2 * proportional gain (Kp)
+volatile float twoKi = twoKiDef;                                           // 2 * integral gain (Ki)
+volatile float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;                 // quaternion of sensor frame relative to auxiliary frame
+volatile float integralFBx = 0.0f, integralFBy = 0.0f, integralFBz = 0.0f; // integral error terms scaled by Ki
 //-------------------------------
-float quart[4]={1.0f,0.0f,0.0f,0.0f};
+float quart[4] = {1.0f, 0.0f, 0.0f, 0.0f};
 
-float now_t,past_t;
+float now_t, past_t;
 float pitch, yaw, roll;
 int last_update = 0, first_update = 0, now = 0;
 
-float accoffset[3],gyrooffset[3];
-int16_t accel_[3],gyro_[3];
-int16_t accel_bias_res[3],gyro_bias_res[3];
+float accoffset[3], gyrooffset[3];
+int16_t accel_[3], gyro_[3];
+int16_t accel_bias_res[3], gyro_bias_res[3];
 float delta_t;
 float self_test[6] = {0, 0, 0, 0, 0, 0};
 
-
 int64_t now_time = 0, prev_time = 0;
-float accX ,accY ,accZ ,gyroX ,gyroY ,gyroZ;
-float angleAccX ,angleAccY;
-float interval ;
-float angleGyroX,angleGyroY ,angleGyroZ;
-float angleX ,angleY ,angleZ ;
+float accX, accY, accZ, gyroX, gyroY, gyroZ;
+float angleAccX, angleAccY;
+float interval;
+float angleGyroX, angleGyroY, angleGyroZ;
+float angleX, angleY, angleZ;
 
-//IMU初始化
+static proto_imu_data_t proto_imu_data;
+
+// IMU初始化
 bool mpu6050_init()
 {
     mpu6050_device_address = MPU6050_DEVICE;
@@ -2802,7 +2803,6 @@ void mpu6050_calibrate(float *accel_bias_res, float *gyro_bias_res)
     mpu6050_set_full_scale_accel_range(MPU6050_ACCEL_FULL_SCALE_RANGE_2);
     mpu6050_set_full_scale_gyro_range(MPU6050_GYRO_FULL_SCALE_RANGE_250);
 
-
     /**
      * Configure FIFO to capture data for bias calculation.
      */
@@ -2824,10 +2824,10 @@ void mpu6050_calibrate(float *accel_bias_res, float *gyro_bias_res)
     mpu6050_set_temp_fifo_enabled(0);
 
     // Sets of full gyro and accelerometer data for averaging:
-    //packet_count 代表滤除偏差的次数，可以根据时间大小修改
-   //packet_count = mpu6050_get_fifo_count() / 12;
-    packet_count = 5;   
-    //ESP_LOGI(FISHBOT_MODLUE,"packet_count:%d",packet_count);
+    // packet_count 代表滤除偏差的次数，可以根据时间大小修改
+    // packet_count = mpu6050_get_fifo_count() / 12;
+    packet_count = 5;
+    // ESP_LOGI(FISHBOT_MODLUE,"packet_count:%d",packet_count);
     for (int i = 0; i < packet_count; i++)
     {
         // Read data for averaging:
@@ -2846,7 +2846,7 @@ void mpu6050_calibrate(float *accel_bias_res, float *gyro_bias_res)
         gyro_bias[0] += (int32_t)gyro_temp[0];
         gyro_bias[1] += (int32_t)gyro_temp[1];
         gyro_bias[2] += (int32_t)gyro_temp[2];
-        ESP_LOGI(FISHBOT_MODLUE, "i:%d",i);
+        ESP_LOGI(FISHBOT_MODLUE, "i:%d", i);
     }
 
     // Normalize sums to get average count biases:
@@ -2856,8 +2856,8 @@ void mpu6050_calibrate(float *accel_bias_res, float *gyro_bias_res)
     gyro_bias[0] /= (int32_t)packet_count;
     gyro_bias[1] /= (int32_t)packet_count;
     gyro_bias[2] /= (int32_t)packet_count;
-    //ESP_LOGI(FISHBOT_MODLUE, "gyro_bias:%d",gyro_bias[0]);
-    // Remove gravity from the z-axis accelerometer bias calculation:
+    // ESP_LOGI(FISHBOT_MODLUE, "gyro_bias:%d",gyro_bias[0]);
+    //  Remove gravity from the z-axis accelerometer bias calculation:
     if (accel_bias[2] > 0L)
         accel_bias[2] -= (int32_t)accel_sensitivity;
     else
@@ -2951,14 +2951,14 @@ void mpu6050_self_test(float *destination)
     mpu6050_set_accel_z_self_test(true);
     mpu6050_set_full_scale_accel_range(MPU6050_ACCEL_FULL_SCALE_RANGE_8);
     mpu6050_set_full_scale_gyro_range(MPU6050_GYRO_FULL_SCALE_RANGE_250);
-  
+
     self_test[0] = mpu6050_get_accel_x_self_test_factory_trim();
     self_test[1] = mpu6050_get_accel_y_self_test_factory_trim();
     self_test[2] = mpu6050_get_accel_z_self_test_factory_trim();
     self_test[3] = mpu6050_get_gyro_x_self_test_factory_trim();
     self_test[4] = mpu6050_get_gyro_y_self_test_factory_trim();
     self_test[5] = mpu6050_get_gyro_z_self_test_factory_trim();
- 
+
     // Process results to allow final comparison with factory set values:
     factory_trim[0] = (4096.0f * 0.34f) * (pow((0.92f / 0.34f), ((self_test[0] - 1.0f) / 30.0f)));
     factory_trim[1] = (4096.0f * 0.34f) * (pow((0.92f / 0.34f), ((self_test[1] - 1.0f) / 30.0f)));
@@ -3002,7 +3002,7 @@ void mpu6050_madgwick_quaternion_update(
 
     // Normalise accelerometer measurement:
     norm = sqrt(accel_x * accel_x + accel_y * accel_y + accel_z * accel_z);
-    
+
     // Handle NaN:
     if (norm == 0.0f)
         return;
@@ -3051,8 +3051,8 @@ void mpu6050_madgwick_quaternion_update(
     q_dot_2 = half_q1 * gyro_x + half_q3 * gyro_z - half_q4 * gyro_y;
     q_dot_3 = half_q1 * gyro_y - half_q2 * gyro_z + half_q4 * gyro_x;
     q_dot_4 = half_q1 * gyro_z + half_q2 * gyro_y - half_q3 * gyro_x;
-    //ESP_LOGI(FISHBOT_MODLUE, "1111 q0:%.3f,q1:%.3f,q2:%.3f,q3:%.3f",q_dot_1,q_dot_2,q_dot_3,q_dot_4);
-    // Compute then integrate estimated quaternion derivative:
+    // ESP_LOGI(FISHBOT_MODLUE, "1111 q0:%.3f,q1:%.3f,q2:%.3f,q3:%.3f",q_dot_1,q_dot_2,q_dot_3,q_dot_4);
+    //  Compute then integrate estimated quaternion derivative:
     quart[0] += (q_dot_1 - (BETA * hat_dot_1)) * delta_t;
     quart[1] += (q_dot_2 - (BETA * hat_dot_2)) * delta_t;
     quart[2] += (q_dot_3 - (BETA * hat_dot_3)) * delta_t;
@@ -3064,153 +3064,153 @@ void mpu6050_madgwick_quaternion_update(
     quart[1] *= norm;
     quart[2] *= norm;
     quart[3] *= norm;
-
 }
 
-void MahonyAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float az) {
-	float recipNorm;
-	float halfvx, halfvy, halfvz;
-	float halfex, halfey, halfez;
-	float qa, qb, qc;
+void MahonyAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float az)
+{
+    float recipNorm;
+    float halfvx, halfvy, halfvz;
+    float halfex, halfey, halfez;
+    float qa, qb, qc;
 
-	// Compute feedback only if accelerometer measurement valid (avoids NaN in accelerometer normalisation)
-	if(!((ax == 0.0f) && (ay == 0.0f) && (az == 0.0f))) {
+    // Compute feedback only if accelerometer measurement valid (avoids NaN in accelerometer normalisation)
+    if (!((ax == 0.0f) && (ay == 0.0f) && (az == 0.0f)))
+    {
 
-		// Normalise accelerometer measurement
-		recipNorm = invSqrt(ax * ax + ay * ay + az * az);
-		ax *= recipNorm;
-		ay *= recipNorm;
-		az *= recipNorm;        
+        // Normalise accelerometer measurement
+        recipNorm = invSqrt(ax * ax + ay * ay + az * az);
+        ax *= recipNorm;
+        ay *= recipNorm;
+        az *= recipNorm;
 
-		// Estimated direction of gravity and vector perpendicular to magnetic flux
-		halfvx = q1 * q3 - q0 * q2;
-		halfvy = q0 * q1 + q2 * q3;
-		halfvz = q0 * q0 - 0.5f + q3 * q3;
-	
-		// Error is sum of cross product between estimated and measured direction of gravity
-		halfex = (ay * halfvz - az * halfvy);
-		halfey = (az * halfvx - ax * halfvz);
-		halfez = (ax * halfvy - ay * halfvx);
+        // Estimated direction of gravity and vector perpendicular to magnetic flux
+        halfvx = q1 * q3 - q0 * q2;
+        halfvy = q0 * q1 + q2 * q3;
+        halfvz = q0 * q0 - 0.5f + q3 * q3;
 
-		// Compute and apply integral feedback if enabled
-		if(twoKi > 0.0f) {
-			integralFBx += twoKi * halfex * (1.0f / sampleFreq);	// integral error scaled by Ki
-			integralFBy += twoKi * halfey * (1.0f / sampleFreq);
-			integralFBz += twoKi * halfez * (1.0f / sampleFreq);
-			gx += integralFBx;	// apply integral feedback
-			gy += integralFBy;
-			gz += integralFBz;
-		}
-		else {
-			integralFBx = 0.0f;	// prevent integral windup
-			integralFBy = 0.0f;
-			integralFBz = 0.0f;
-		}
+        // Error is sum of cross product between estimated and measured direction of gravity
+        halfex = (ay * halfvz - az * halfvy);
+        halfey = (az * halfvx - ax * halfvz);
+        halfez = (ax * halfvy - ay * halfvx);
 
-		// Apply proportional feedback
-		gx += twoKp * halfex;
-		gy += twoKp * halfey;
-		gz += twoKp * halfez;
-	}
-	
-	// Integrate rate of change of quaternion
-	gx *= (0.5f * (1.0f / sampleFreq));		// pre-multiply common factors
-	gy *= (0.5f * (1.0f / sampleFreq));
-	gz *= (0.5f * (1.0f / sampleFreq));
-	qa = q0;
-	qb = q1;
-	qc = q2;
-	q0 += (-qb * gx - qc * gy - q3 * gz);
-	q1 += (qa * gx + qc * gz - q3 * gy);
-	q2 += (qa * gy - qb * gz + q3 * gx);
-	q3 += (qa * gz + qb * gy - qc * gx); 
-	
-	// Normalise quaternion
-	recipNorm = invSqrt(q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3);
-	q0 *= recipNorm;
-	q1 *= recipNorm;
-	q2 *= recipNorm;
-	q3 *= recipNorm;
+        // Compute and apply integral feedback if enabled
+        if (twoKi > 0.0f)
+        {
+            integralFBx += twoKi * halfex * (1.0f / sampleFreq); // integral error scaled by Ki
+            integralFBy += twoKi * halfey * (1.0f / sampleFreq);
+            integralFBz += twoKi * halfez * (1.0f / sampleFreq);
+            gx += integralFBx; // apply integral feedback
+            gy += integralFBy;
+            gz += integralFBz;
+        }
+        else
+        {
+            integralFBx = 0.0f; // prevent integral windup
+            integralFBy = 0.0f;
+            integralFBz = 0.0f;
+        }
 
+        // Apply proportional feedback
+        gx += twoKp * halfex;
+        gy += twoKp * halfey;
+        gz += twoKp * halfez;
+    }
 
-	yaw= -atan2(2 * q1 * q2 + 2 * q0* q3, -2 * q2*q2 - 2 * q3 * q3 + 1)*57.3; // yaw        -pi----pi
-    pitch= -asin(-2 * q1 * q3 + 2 * q0 * q2)*57.3; // pitch    -pi/2    --- pi/2 
-    roll= atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2* q2 + 1)*57.3; // roll       -pi-----pi 
+    // Integrate rate of change of quaternion
+    gx *= (0.5f * (1.0f / sampleFreq)); // pre-multiply common factors
+    gy *= (0.5f * (1.0f / sampleFreq));
+    gz *= (0.5f * (1.0f / sampleFreq));
+    qa = q0;
+    qb = q1;
+    qc = q2;
+    q0 += (-qb * gx - qc * gy - q3 * gz);
+    q1 += (qa * gx + qc * gz - q3 * gy);
+    q2 += (qa * gy - qb * gz + q3 * gx);
+    q3 += (qa * gz + qb * gy - qc * gx);
 
-	//ESP_LOGI("FISHBOT_MODLUE","q0:%.3f,q1:%.3f,q2:%.3f,q3:%.3f",q0,q1,q2,q3);
-    ESP_LOGI("FISHBOT_MODLUE","pitch:%.3f,roll:%.3f,yaw:%.3f,",pitch,roll,yaw);
+    // Normalise quaternion
+    recipNorm = invSqrt(q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3);
+    q0 *= recipNorm;
+    q1 *= recipNorm;
+    q2 *= recipNorm;
+    q3 *= recipNorm;
+
+    yaw = -atan2(2 * q1 * q2 + 2 * q0 * q3, -2 * q2 * q2 - 2 * q3 * q3 + 1) * 57.3; // yaw        -pi----pi
+    pitch = -asin(-2 * q1 * q3 + 2 * q0 * q2) * 57.3;                               // pitch    -pi/2    --- pi/2
+    roll = atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2 * q2 + 1) * 57.3; // roll       -pi-----pi
+
+    // ESP_LOGI("FISHBOT_MODLUE","q0:%.3f,q1:%.3f,q2:%.3f,q3:%.3f",q0,q1,q2,q3);
+    ESP_LOGI("FISHBOT_MODLUE", "pitch:%.3f,roll:%.3f,yaw:%.3f,", pitch, roll, yaw);
 }
 
-
-float invSqrt(float x) {
-	float halfx = 0.5f * x;
-	float y = x;
-	long i = *(long*)&y;
-	i = 0x5f3759df - (i>>1);
-	y = *(float*)&i;
-	y = y * (1.5f - (halfx * y * y));
-	return y;
+float invSqrt(float x)
+{
+    float halfx = 0.5f * x;
+    float y = x;
+    long i = *(long *)&y;
+    i = 0x5f3759df - (i >> 1);
+    y = *(float *)&i;
+    y = y * (1.5f - (halfx * y * y));
+    return y;
 }
-
 
 bool mpu6050_task_init()
 {
     mpu6050_self_test(self_test);
-    //ESP_LOGI(FISHBOT_MODLUE, "1111 ax:%f,ay:%f,az:%f,gx:%f,gy:%f,gz:%f",self_test[0],self_test[1],self_test[2],self_test[3],self_test[4],self_test[5]);
+    // ESP_LOGI(FISHBOT_MODLUE, "1111 ax:%f,ay:%f,az:%f,gx:%f,gy:%f,gz:%f",self_test[0],self_test[1],self_test[2],self_test[3],self_test[4],self_test[5]);
     if (self_test[0] < 1.0f && self_test[1] < 1.0f && self_test[2] < 1.0f &&
-        self_test[3] < 1.0f && self_test[4] < 1.0f && self_test[5] < 1.0f) {
+        self_test[3] < 1.0f && self_test[4] < 1.0f && self_test[5] < 1.0f)
+    {
         mpu6050_reset();
         ESP_LOGI(FISHBOT_MODLUE, "Device being calibrated.");
         mpu6050_init();
         ESP_LOGI(FISHBOT_MODLUE, "Device initialized.");
     }
-    else 
-        {
-            ESP_LOGI(FISHBOT_MODLUE, "Device did not pass self-test.");
-            return false;
-        }
-
-    //上电后3000次平均滤波
-    for(int i= 0;i<filter_time;i++)
+    else
     {
-        mpu6050_get_motion(accel_bias_res,accel_bias_res);
+        ESP_LOGI(FISHBOT_MODLUE, "Device did not pass self-test.");
+        return false;
+    }
+    ESP_LOGI(FISHBOT_MODLUE, "mpu6050 task init start !.");
+    //上电后3000次平均滤波
+    for (int i = 0; i < filter_time; i++)
+    {
+        mpu6050_get_motion(accel_bias_res, accel_bias_res);
         accoffset[0] += ((float)accel_bias_res[0]) / Acc_Gain;
         accoffset[1] += ((float)accel_bias_res[1]) / Acc_Gain;
         accoffset[2] += ((float)accel_bias_res[2]) / Acc_Gain;
         gyrooffset[0] += ((float)accel_bias_res[0]) / Gyro_Gain;
         gyrooffset[1] += ((float)accel_bias_res[1]) / Gyro_Gain;
         gyrooffset[2] += ((float)accel_bias_res[2]) / Gyro_Gain;
-        ESP_LOGI(FISHBOT_MODLUE, "i:%d.",i);
     }
-        accoffset[0] = (accoffset[0]) / filter_time;
-        accoffset[1] = (accoffset[1]) / filter_time;
-        accoffset[2] = (accoffset[2]) / filter_time;
-        gyrooffset[0] = (gyrooffset[0]) / filter_time;
-        gyrooffset[1] = (gyrooffset[1]) / filter_time;
-        gyrooffset[2] = (gyrooffset[2]) / filter_time;
+    accoffset[0] = (accoffset[0]) / filter_time;
+    accoffset[1] = (accoffset[1]) / filter_time;
+    accoffset[2] = (accoffset[2]) / filter_time;
+    gyrooffset[0] = (gyrooffset[0]) / filter_time;
+    gyrooffset[1] = (gyrooffset[1]) / filter_time;
+    gyrooffset[2] = (gyrooffset[2]) / filter_time;
 
     ESP_LOGI(FISHBOT_MODLUE, "mpu6050 task init success !.");
-
+    proto_set_imu_data(&proto_imu_data);
     return true;
 }
-
 
 void get_mpu6050_euler_angle(void *param)
 {
     while (1)
     {
         now_time = esp_timer_get_time();
-        interval = (float)(now_time - prev_time)/1000000.0f;
+        interval = (float)(now_time - prev_time) / 1000000.0f;
 
-        mpu6050_get_motion(accel_,gyro_);  //原始数据，没有处理
+        mpu6050_get_motion(accel_, gyro_); //原始数据，没有处理
         accX = ((float)-accel_[0]) / Acc_Gain;
         accY = ((float)-accel_[1]) / Acc_Gain;
         accZ = ((float)-accel_[2]) / Acc_Gain;
-        
-        gyroX = (((float)gyro_[0]) / Gyro_Gain)-gyrooffset[0];
-        gyroY = (((float)gyro_[1]) / Gyro_Gain)-gyrooffset[1];
-        gyroZ = (((float)gyro_[2]) / Gyro_Gain)-gyrooffset[2];
-       
+
+        gyroX = (((float)gyro_[0]) / Gyro_Gain) - gyrooffset[0];
+        gyroY = (((float)gyro_[1]) / Gyro_Gain) - gyrooffset[1];
+        gyroZ = (((float)gyro_[2]) / Gyro_Gain) - gyrooffset[2];
+
         angleAccX = atan2(accY, sqrt(accZ * accZ + accX * accX)) * 360 / 2.0 / PI;
         angleAccY = atan2(accX, sqrt(accZ * accZ + accY * accY)) * 360 / -2.0 / PI;
 
@@ -3222,20 +3222,30 @@ void get_mpu6050_euler_angle(void *param)
         roll = (gyroCofe * (angleY + gyroY * interval)) + (accCofe * angleAccY);
         yaw = angleGyroZ;
 
-        while(yaw < 0 ) yaw += 360;
-        while(yaw > 360 ) yaw -=360;
-
-        ESP_LOGI(FISHBOT_MODLUE,"pitch:%.3f,roll:%.3f,yaw:%.3f",pitch,roll,yaw);
+        while (yaw < 0)
+            yaw += 360;
+        while (yaw > 360)
+            yaw -= 360;
 
         prev_time = now_time;
-    }
 
-    
+
+        ESP_LOGI(FISHBOT_MODLUE, "pitch:%.3f,roll:%.3f,yaw:%.3f", pitch, roll, yaw);
+        proto_imu_data.accel[0] = accX;
+        proto_imu_data.accel[1] = accY;
+        proto_imu_data.accel[2] = accZ;
+
+        proto_imu_data.gyro[0] = gyroX;
+        proto_imu_data.gyro[1] = gyroY;
+        proto_imu_data.gyro[2] = gyroZ;
+
+        proto_imu_data.euler[0] = roll;
+        proto_imu_data.euler[1] = pitch;
+        proto_imu_data.euler[2] = yaw;
+
+    }
 }
 void mpu6050_task(void)
 {
-    
     xTaskCreate(get_mpu6050_euler_angle, "get_mpu6050_euler_angle", 8 * 1024, NULL, 5, NULL);
 }
-
-

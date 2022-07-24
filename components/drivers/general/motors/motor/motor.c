@@ -1,4 +1,3 @@
-
 /**
  * @brief 文件描述：待更新
  * @author 小鱼 (fishros@foxmail.com)
@@ -44,6 +43,7 @@ static uint16_t tick_to_mms[MAX_MOTOR_NUM] = {
     62.011394, 62.011394}; // 电机的编码器和距离换算出的值
 static proto_motor_encoder_data_t
     proto_motor_encoder_data_; // 上传存储的编码器数据
+
 
 bool set_motor_config(uint8_t motor_num, motor_config_t *motor_configs,
                       pid_ctrl_config_t *pid_configs)

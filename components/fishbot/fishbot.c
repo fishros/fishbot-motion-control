@@ -18,7 +18,9 @@
 bool fishbot_init(void)
 {
     fishbot_config_init();
-    ESP_LOGI(FISHBOT_MODLUE, "fishbot init with %s:%s", fishbot_config_get_driver_version(), fishbot_config_get_hardware_version());
+    ESP_LOGI(FISHBOT_MODLUE, "fishbot init with %s:%s",
+             fishbot_config_get_driver_version(),
+             fishbot_config_get_hardware_version());
     if (!fishbot_init_hardware())
         return false;
 
@@ -28,9 +30,10 @@ bool fishbot_init(void)
 bool fishbot_task_init(void)
 {
     led_task_init();
-    //motor_task_init(); //电机功能
-    //protocol_task_init();
+    motor_task_init();
     mpu6050_task();
+    protocol_task_init();
+    esp_log_level_set("MPU6050",ESP_LOG_NONE); // 不输出IMU模块日志
     return true;
 }
 
@@ -45,11 +48,11 @@ bool fishbot_init_hardware(void)
     if (!oled_init())
         return false;
     if (!mpu6050_task_init())
-        return false; 
+        return false;
     if (!wifi_init())
         return false;
-    // if (!protocol_init()) //这个地方暂时初始化不通过 
-    //     return false;       
+    if (!protocol_init())
+        return false;
     char host[16];
     if (get_wifi_ip(host) != WIFI_STATUS_STA_DISCONECTED)
     {
