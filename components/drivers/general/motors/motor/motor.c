@@ -142,7 +142,7 @@ static void motor_task(void *param)
     last_time_mm = xTaskGetTickCount();
     while (1)
     {
-        vTaskDelay(pdMS_TO_TICKS(20));
+        vTaskDelay(pdMS_TO_TICKS(10));
         current_time_mm = xTaskGetTickCount();
         delta_time_mm = current_time_mm - last_time_mm;
         last_time_mm = current_time_mm;
