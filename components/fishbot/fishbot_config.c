@@ -53,19 +53,19 @@ static pid_ctrl_config_t pid_config[] = {
 static motor_config_t motor_configs[] = {
     {
         .motor_id = 0,
-        .io_pwm = 4,
-        .io_positive = 22,
-        .io_negative = 23,
-        .io_encoder_positive = 32,
-        .io_encoder_negative = 33,
-    },
-    {
-        .motor_id = 1,
         .io_pwm = 5,
         .io_positive = 12,
         .io_negative = 13,
         .io_encoder_positive = 26,
         .io_encoder_negative = 25,
+    },
+    {
+        .motor_id = 1,
+        .io_pwm = 4,
+        .io_positive = 22,
+        .io_negative = 23,
+        .io_encoder_positive = 32,
+        .io_encoder_negative = 33,
     },
 };
 
@@ -87,7 +87,7 @@ fishbot_wifi_config_t wifi_config = {
 protocol_config_t protocol_config = {
     .mode = MODE_WIFI_UDP_PC,
     .wifi_udp_pc_config = {
-        .server_address = "192.168.0.106",
+        .server_address = "192.168.0.103",
         .server_port = 3474,
     },
 };
