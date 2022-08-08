@@ -10,17 +10,18 @@
 #endif
 
 #include "udp_client_protocol.h"
+#include "udp_server_protocol.h"
 #include "uart_protocol.h"
 
 /**
- * @brief 定义FISHBOT的通讯模式，目前提供USB串口通信，UDP手机APP通信和UDP电脑端通信。其中UDP_PC需要提供，SSID&PSWD HOST&PORT
+ * @brief 定义FISHBOT的通讯模式，目前提供USB串口通信
  *
  */
 typedef enum
 {
     MODE_USB = 0,
-    MODE_WIFI_UDP_APP,
-    MODE_WIFI_UDP_PC,
+    MODE_WIFI_UDP_CLIENT,
+    MODE_WIFI_UDP_SERVER,
 } fishbot_mode_t;
 
 typedef struct

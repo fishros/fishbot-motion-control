@@ -31,9 +31,10 @@ bool fishbot_task_init(void)
 {
     led_task_init();
     motor_task_init();
-    mpu6050_task();
+    // mpu6050_task();
     protocol_task_init();
     esp_log_level_set("MPU6050",ESP_LOG_NONE); // 不输出IMU模块日志
+    esp_log_level_set("PROTOCOL",ESP_LOG_NONE); // 不输出PROTOCOL模块日志
     return true;
 }
 
@@ -47,8 +48,8 @@ bool fishbot_init_hardware(void)
         return false;
     if (!oled_init())
         return false;
-    if (!mpu6050_task_init())
-        return false;
+    // if (!mpu6050_task_init())
+    //     return false;
     if (!wifi_init())
         return false;
     if (!protocol_init())

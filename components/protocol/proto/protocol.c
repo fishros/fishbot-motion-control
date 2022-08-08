@@ -10,7 +10,7 @@ static xQueueHandle data_tx_queue_;
 bool set_protocol_config(protocol_config_t *protocol_config)
 {
   protocol_config_ = protocol_config;
-  if (protocol_config->mode == MODE_WIFI_UDP_PC)
+  if (protocol_config->mode == MODE_WIFI_UDP_CLIENT)
   {
     set_udp_client_config(&protocol_config->wifi_udp_pc_config);
   }
@@ -27,9 +27,13 @@ bool protocol_init()
   {
     uart_protocol_init(&data_rx_queue_, &data_tx_queue_);
   }
-  else if (protocol_config_->mode == MODE_WIFI_UDP_PC)
+  else if (protocol_config_->mode == MODE_WIFI_UDP_CLIENT)
   {
     udp_client_protocol_init(&data_rx_queue_, &data_tx_queue_);
+  }
+  else if (protocol_config_->mode == MODE_WIFI_UDP_SERVER)
+  {
+    udp_server_protocol_init(&data_rx_queue_, &data_tx_queue_);
   }
 
   return true;
@@ -120,7 +124,8 @@ void proto_upload_data_task(void *params)
   while (true)
   {
     proto_get_upload_frame(&protocol_package);
-    if (xQueueSend(data_tx_queue_, protocol_package, 2 / portTICK_RATE_MS) != pdTRUE)
+    if (xQueueSend(data_tx_queue_, protocol_package, 2 / portTICK_RATE_MS) !=
+        pdTRUE)
     {
       ESP_LOGW(FISHBOT_MODLUE, "send to queue failed!");
     }
@@ -136,9 +141,13 @@ bool protocol_task_init(void)
   {
     uart_protocol_task_init();
   }
-  else if (protocol_config_->mode == MODE_WIFI_UDP_PC)
+  else if (protocol_config_->mode == MODE_WIFI_UDP_CLIENT)
   {
     udp_client_protocol_task_init();
+  }
+  else if (protocol_config_->mode == MODE_WIFI_UDP_SERVER)
+  {
+    udp_server_protocol_task_init();
   }
   // 启动数据帧收发任务
   xTaskCreate(proto_upload_data_task, "proto_upload_data_task", 1024 * 2, NULL,
