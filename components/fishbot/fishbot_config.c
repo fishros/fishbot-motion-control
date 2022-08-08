@@ -85,11 +85,11 @@ fishbot_wifi_config_t wifi_config = {
 };
 
 protocol_config_t protocol_config = {
-    .mode = MODE_WIFI_UDP_PC,
-    .wifi_udp_pc_config = {
-        .server_address = "192.168.0.103",
-        .server_port = 3474,
-    },
+    .mode = MODE_WIFI_UDP_SERVER,
+    // .wifi_udp_pc_config = {
+    //     .server_address = "192.168.0.103",
+    //     .server_port = 3474,
+    // },
 };
 
 bool fishbot_config_init() {

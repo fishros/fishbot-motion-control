@@ -106,8 +106,8 @@ uint16_t proto_get_upload_frame(protocol_package_t **protocol_package)
 
 
   /*添加IMU数据帧*/
-  data_frame_size++;
-  data_frame_len += get_imu_data(frame_data + data_frame_len);
+  // data_frame_size++;
+  // data_frame_len += get_imu_data(frame_data + data_frame_len);
 
   /*设置数据帧的数量*/
   frame_data[0] = data_frame_size;
