@@ -74,7 +74,7 @@ bool set_wifi_config(fishbot_wifi_config_t *wifi_config)
  */
 bool wifi_set_as_ap(char *ssid, char *pswd)
 {
-
+    uint8_t mac[6];
     esp_netif_create_default_wifi_ap();
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
@@ -92,9 +92,11 @@ bool wifi_set_as_ap(char *ssid, char *pswd)
         },
     };
 
-    strcpy((char *)wifi_config.ap.ssid, ssid);
+    ESP_ERROR_CHECK(esp_wifi_get_mac(ESP_IF_WIFI_AP, mac));
+    wifi_config.ap.ssid_len = sprintf((char *)wifi_config.ap.ssid, "%s_%02X%02X", ssid, mac[0], mac[1]);
+    // sprintf(ssid, "%s_%02X%02X%02X%02X%02X%02X", ssid, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    // strcpy((char *)wifi_config.ap.ssid, ssid);
     strcpy((char *)wifi_config.ap.password, pswd);
-    wifi_config.ap.ssid_len = strlen(ssid);
 
     if (strlen(pswd) == 0)
     {
