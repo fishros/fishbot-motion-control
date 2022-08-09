@@ -78,14 +78,14 @@ i2c_device_config_t i2c_device_config = {
 fishbot_wifi_config_t wifi_config = {
     .ssid = "fishbot",
     .pswd = "fishros.com",
-    .ap_ssid = "fbmc",
-    .ap_pswd = "",
-    .mode = WIFI_MODE_STA,
-    // .mode = WIFI_MODE_AP,
+    .ap_ssid = "FISHBOT",
+    .ap_pswd = "fishros.com",
+    // .mode = WIFI_MODE_STA,
+    .mode = WIFI_MODE_AP,
 };
 
 protocol_config_t protocol_config = {
-    .mode = MODE_WIFI_UDP_SERVER,
+    .mode = MODE_USB,
     // .wifi_udp_pc_config = {
     //     .server_address = "192.168.0.103",
     //     .server_port = 3474,

@@ -43,10 +43,15 @@ uint16_t proto_deal_frame_data(protocol_package_t *protocol_package)
   static uint16_t frame_size = 0;
   frame_size = inverse_escape_frame(protocol_package->data, frame,
                                     protocol_package->size);
-  print_frame_to_hex((uint8_t *)"uart frame", frame, frame_size);
   return protocol_package->size;
 }
 
+/**
+ * @brief 将编码器数据转换成数据帧
+ * 
+ * @param frame_data 
+ * @return uint16_t 
+ */
 uint16_t get_encoder_data(uint8_t *frame_data)
 {
   static uint16_t data_header_len = sizeof(proto_data_header_t);
@@ -104,7 +109,6 @@ uint16_t proto_get_upload_frame(protocol_package_t **protocol_package)
   // data_frame_size++;
   // data_frame_len += get_encoder_data(frame_data + data_frame_len);
 
-
   /*添加IMU数据帧*/
   // data_frame_size++;
   // data_frame_len += get_imu_data(frame_data + data_frame_len);
@@ -128,8 +132,6 @@ uint16_t proto_get_upload_frame(protocol_package_t **protocol_package)
   // 对数据帧进行转义
   protocol_package_.size =
       escape_frame(frame, protocol_package_.data, frame_len);
-  // print_frame_to_hex((uint8_t *)"frame", protocol_package_.data,
-  //                    protocol_package_.size);
   *protocol_package = &protocol_package_;
   return (*protocol_package)->size;
 }

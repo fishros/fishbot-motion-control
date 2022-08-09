@@ -56,6 +56,7 @@ void proto_deal_data_task(void *params)
   static proto_data_header_t data_header; // 解析数据时临时索引
   /*被解析的数据定义*/
   static proto_motor_speed_ctrl_data_t ctrl_data; // 电机速度控制数据
+  static proto_device_control_t ctrl_device;      // 设备控制数据
 
   while (true)
   {
@@ -103,7 +104,15 @@ void proto_deal_data_task(void *params)
         memcpy(&ctrl_data, frame + frame_parse_index, data_header.data_len);
         // 调用速度更新函数
         proto_update_motor_speed(&ctrl_data);
-
+        break;
+      case DATA_DEV_CONTROL:
+        memcpy(&ctrl_device, frame + frame_parse_index, data_header.data_len);
+        // 如果是重启指令则重新启动设备
+        if (ctrl_device.operation == DEIVCE_RESTART)
+        {
+          esp_restart();
+        }
+        break;
 #ifdef DEBUG_FISHBOT
         printf("recv speed[%d,%d]\n", ctrl_data.motor_speed[0],
                ctrl_data.motor_speed[1]);
