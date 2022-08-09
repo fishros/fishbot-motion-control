@@ -2,11 +2,15 @@
 #define _PROTOCOL_H_
 #include "freertos/FreeRTOS.h"
 
-#define PROTO_V1_0_0_220621
+#define PROTO_V1_0_0_220806
 
 #include "proto_utils.h"
+
 #ifdef PROTO_V1_0_0_220621
 #include "proto_v1.0.0.20220621.h"
+#endif
+#ifdef PROTO_V1_0_0_220806
+#include "proto_v1.0.0.20220806.h"
 #endif
 
 #include "udp_client_protocol.h"
