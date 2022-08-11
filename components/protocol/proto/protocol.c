@@ -2,17 +2,17 @@
 
 #define FISHBOT_MODLUE "PROTOCOL"
 
-static protocol_config_t *protocol_config_;
+static fishbot_proto_config_t *protocol_config_;
 
 static xQueueHandle data_rx_queue_;
 static xQueueHandle data_tx_queue_;
 
-bool set_protocol_config(protocol_config_t *protocol_config)
+bool set_protocol_config(fishbot_proto_config_t *protocol_config)
 {
   protocol_config_ = protocol_config;
-  if (protocol_config->mode == MODE_WIFI_UDP_CLIENT)
+  if (protocol_config->mode == PROTO_MODE_WIFI_UDP_CLIENT)
   {
-    set_udp_client_config(&protocol_config->wifi_udp_pc_config);
+    set_udp_client_config(&protocol_config);
   }
   return true;
 }
@@ -23,15 +23,15 @@ bool protocol_init()
   data_rx_queue_ = xQueueCreate(5, sizeof(protocol_package_t));
   data_tx_queue_ = xQueueCreate(5, sizeof(protocol_package_t));
   /* 根据模式配置不同通信任务 */
-  if (protocol_config_->mode == MODE_USB)
+  if (protocol_config_->mode == PROTO_MODE_UART)
   {
     uart_protocol_init(&data_rx_queue_, &data_tx_queue_);
   }
-  else if (protocol_config_->mode == MODE_WIFI_UDP_CLIENT)
+  else if (protocol_config_->mode == PROTO_MODE_WIFI_UDP_CLIENT)
   {
     udp_client_protocol_init(&data_rx_queue_, &data_tx_queue_);
   }
-  else if (protocol_config_->mode == MODE_WIFI_UDP_SERVER)
+  else if (protocol_config_->mode == PROTO_MODE_WIFI_UDP_SERVER)
   {
     udp_server_protocol_init(&data_rx_queue_, &data_tx_queue_);
   }
@@ -56,7 +56,8 @@ void proto_deal_data_task(void *params)
   static proto_data_header_t data_header; // 解析数据时临时索引
   /*被解析的数据定义*/
   static proto_motor_speed_ctrl_data_t ctrl_data; // 电机速度控制数据
-  static proto_device_control_t ctrl_device;      // 设备控制数据
+  static proto_data_device_control_t ctrl_device; // 设备控制数据
+  static proto_data_wifi_config_t wifi_config;    // WIFI配置数据
 
   while (true)
   {
@@ -107,12 +108,17 @@ void proto_deal_data_task(void *params)
         break;
       case DATA_DEV_CONTROL:
         memcpy(&ctrl_device, frame + frame_parse_index, data_header.data_len);
-        // 如果是重启指令则重新启动设备
         if (ctrl_device.operation == DEIVCE_RESTART)
         {
+          // 如果是重启指令则重新启动设备
           esp_restart();
         }
         break;
+      case DATA_WIFI_CONFIG:
+        memcpy(&wifi_config, frame + frame_parse_index, data_header.data_len);
+        proto_update_wifi_config(&wifi_config);
+        break;
+
 #ifdef DEBUG_FISHBOT
         printf("recv speed[%d,%d]\n", ctrl_data.motor_speed[0],
                ctrl_data.motor_speed[1]);
@@ -146,15 +152,15 @@ void proto_upload_data_task(void *params)
 bool protocol_task_init(void)
 {
   // 根据模式启动不同通信任务
-  if (protocol_config_->mode == MODE_USB)
+  if (protocol_config_->mode == PROTO_MODE_UART)
   {
     uart_protocol_task_init();
   }
-  else if (protocol_config_->mode == MODE_WIFI_UDP_CLIENT)
+  else if (protocol_config_->mode == PROTO_MODE_WIFI_UDP_CLIENT)
   {
     udp_client_protocol_task_init();
   }
-  else if (protocol_config_->mode == MODE_WIFI_UDP_SERVER)
+  else if (protocol_config_->mode == PROTO_MODE_WIFI_UDP_SERVER)
   {
     udp_server_protocol_task_init();
   }
@@ -166,7 +172,7 @@ bool protocol_task_init(void)
   return true;
 }
 
-bool update_protocol_config(protocol_config_t *protocol_config)
+bool update_protocol_config(fishbot_proto_config_t *protocol_config)
 {
   // 如果发生了状态改变，主要是服务器IP地址改变了，需要进行更新
   // 第一阶段是否可以直接将地址写入到NVS中，如果需要更新，插入USB线，发送更新数据帧（暂未定义），重启即可

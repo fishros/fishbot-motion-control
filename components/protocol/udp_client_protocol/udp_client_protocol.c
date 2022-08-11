@@ -27,11 +27,11 @@ static struct sockaddr_in dest_addr;                       // 目标地址
 static struct sockaddr_storage source_addr;                // 当前地址
 static socklen_t socklen = sizeof(source_addr);            // 地址长度
 static int sock = -1;                                      // Server的SocketID
-static mode_wifi_udp_pc_config_t *udp_pc_config_;          // UDP通信模块配置
+static fishbot_proto_config_t* proto_config_t_ptr_;          // UDP通信模块配置
 
-bool set_udp_client_config(mode_wifi_udp_pc_config_t *udp_pc_config_t)
+bool set_udp_client_config(fishbot_proto_config_t *proto_config_t_ptr)
 {
-    udp_pc_config_ = udp_pc_config_t;
+    proto_config_t_ptr_ = proto_config_t_ptr;
     return true;
 }
 
@@ -45,9 +45,9 @@ bool udp_client_protocol_init(xQueueHandle *rx_queue, xQueueHandle *tx_queue)
 
 bool udp_client_connect()
 {
-    dest_addr.sin_addr.s_addr = inet_addr(udp_pc_config_->server_address);
+    dest_addr.sin_addr.s_addr = inet_addr(proto_config_t_ptr_->ip);
     dest_addr.sin_family = AF_INET;
-    dest_addr.sin_port = htons(udp_pc_config_->server_port);
+    dest_addr.sin_port = htons(proto_config_t_ptr_->port);
     sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
     if (sock < 0)
     {
@@ -58,7 +58,7 @@ bool udp_client_connect()
     }
     is_udp_status_ok = UDP_CONNECT_STATUS_TRUE;
     ESP_LOGI(FISHBOT_MODULE, "Socket created, Connected to %s:%d",
-             udp_pc_config_->server_address, udp_pc_config_->server_port);
+             proto_config_t_ptr_->ip, proto_config_t_ptr_->port);
     return true;
 }
 

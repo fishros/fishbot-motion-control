@@ -59,7 +59,7 @@ float interval;
 float angleGyroX, angleGyroY, angleGyroZ;
 float angleX, angleY, angleZ;
 
-static proto_imu_data_t proto_imu_data;
+static proto_data_imu_t proto_imu_data;
 
 // IMU初始化
 bool mpu6050_init()

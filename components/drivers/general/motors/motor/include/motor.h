@@ -22,6 +22,7 @@
 #include "driver/gpio.h"
 #include "protocol.h"
 
+
 typedef struct
 {
     uint8_t motor_id;
@@ -50,7 +51,7 @@ bool set_motor_config(uint8_t motor_num_, motor_config_t *motor_configs, pid_ctr
  * @return true 
  * @return false 
  */
-uint8_t update_motor_pid_param(proto_pid_data_t *proto_pid_data);
+uint8_t update_motor_pid_param(fishbot_pid_config_t *proto_pid_data);
 
 /**
  * @brief 初始化电机，编码器&PWM

@@ -15,7 +15,7 @@
 #include "lwip/sockets.h"
 #include "lwip/sys.h"
 #include "proto_utils.h"
-
+#include "proto_define.h"
 
 typedef struct
 {
@@ -27,11 +27,11 @@ typedef struct
 /**
  * @brief 设置UDP客户端通信相关配置
  *
- * @param udp_pc_config_t
+ * @param proto_config_t_ptr
  * @return true
  * @return false
  */
-bool set_udp_client_config(mode_wifi_udp_pc_config_t *udp_pc_config_t);
+bool set_udp_client_config(fishbot_proto_config_t* proto_config_t_ptr);
 
 /**
  * @brief UDP客户端通信初始化，主要初始化收发队列（移到配置函数？）

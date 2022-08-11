@@ -16,6 +16,7 @@
 #include "mpu6050.h"
 #include "wifi.h"
 #include "protocol.h"
+#include "store.h"
 
 #define FISHBOT_SOFTWARE_VERSION_STRING_MAX_LEN (32 + 1)
 #define FISHBOT_HARDWARE_VERSION_STRING_MAX_LEN (32 + 1)
@@ -26,6 +27,9 @@
 #define LED_BLUE 0
 // 默认的电机数量
 #define DEFAULT_MOTOR_NUM 2
+
+#define WIFI_MODE_COONFIG_NAME "wifi_config"
+#define PROTO_COONFIG_NAME "proto_config"
 
 /**
  * @brief 系统配置结构体
@@ -38,7 +42,6 @@ typedef struct
     uint8_t motors_num;
 } fishbot_config_t;
 
-
 /**
  * @brief 初始化配置文件，从nvs中加载配置文件
  *
@@ -46,6 +49,14 @@ typedef struct
  * @return false
  */
 bool fishbot_config_init();
+
+/**
+ * @brief 首次上电初始化配置
+ *
+ * @return true
+ * @return false
+ */
+bool fishbot_first_startup_config_init();
 
 /**
  * @brief 对外提供接口，获取配置文件

@@ -20,18 +20,20 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
+#include "protocol.h"
+
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT BIT1
 #define WIF_MAX_AP_CONNECTION 2
 
-typedef struct
-{
-    char ssid[32];
-    char pswd[64];
-    char ap_ssid[32];
-    char ap_pswd[64];
-    wifi_mode_t mode;
-} fishbot_wifi_config_t;
+// typedef struct
+// {
+//     char ssid[32];
+//     char pswd[64];
+//     char ap_ssid[32];
+//     char ap_pswd[64];
+//     wifi_mode_t mode;
+// } fishbot_wifi_config_t;
 
 typedef enum
 {

@@ -6,7 +6,6 @@
  * @copyright 版权所有：FishBot Open Source Organization
  */
 
-#include "nvs_flash.h"
 #include "fishbot.h"
 
 /**
