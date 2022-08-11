@@ -1,22 +1,27 @@
-#ifndef __NVS_H__
-#define __NVS_H__
+#ifndef FISHBOT_NVS_H__
+#define FISHBOT_NVS_H__
 #include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "freertos/queue.h"
-#include "freertos/event_groups.h"
-
-#include "esp_log.h"
 #include "esp_system.h"
-#include "esp_err.h"
-#include "esp32_i2c_rw.h"
+#include "nvs_flash.h"
+#include "nvs.h"
+#include <string.h>
+#include "esp_log.h"
+
+#define NVS_DATA_UINT8_NONE -127
 
 void nvs_test(void);
 
 void nvs_read_string(char * string_name);
+
+/**
+ * @brief 从数据库读取结构体数据
+ * 
+ * @param struct_name 
+ * @param pStruct 
+ * @param length 
+ */
 void nvs_read_struct(char * struct_name,void * pStruct,uint32_t length);
 
 void nvs_write_string(char * string_name,char * string_value);

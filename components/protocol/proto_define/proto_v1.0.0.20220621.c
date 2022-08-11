@@ -4,8 +4,8 @@ static update_pid_params_fun_t update_pid_params_fun_;
 static update_speed_params_fun_t update_speed_params_fun_;
 
 static protocol_package_t protocol_package_;
-static proto_motor_encoder_data_t *proto_motor_encoder_data_;
-static proto_imu_data_t *proto_imu_data_;
+static proto_data_motor_encoder_t *proto_motor_encoder_data_;
+static proto_data_imu_t *proto_imu_data_;
 
 bool proto_register_update_pid_fun(
     update_pid_params_fun_t *update_pid_params_fun)
@@ -27,12 +27,12 @@ void proto_update_motor_speed(proto_motor_speed_ctrl_data_t *motor_speed)
 }
 
 void proto_set_motor_encoder_data(
-    proto_motor_encoder_data_t *proto_motor_encoder_data)
+    proto_data_motor_encoder_t *proto_motor_encoder_data)
 {
   proto_motor_encoder_data_ = proto_motor_encoder_data;
 }
 
-void proto_set_imu_data(proto_imu_data_t *proto_imu_data)
+void proto_set_imu_data(proto_data_imu_t *proto_imu_data)
 {
   proto_imu_data_ = proto_imu_data;
 }
@@ -50,7 +50,7 @@ uint16_t proto_deal_frame_data(protocol_package_t *protocol_package)
 uint16_t get_encoder_data(uint8_t *frame_data)
 {
   static uint16_t data_header_len = sizeof(proto_data_header_t);
-  static uint16_t data_content_len = sizeof(proto_motor_encoder_data_t);
+  static uint16_t data_content_len = sizeof(proto_data_motor_encoder_t);
 
   proto_data_header_t proto_data_header;
   proto_data_header.data_id = DATA_ENCODER;
@@ -68,7 +68,7 @@ uint16_t get_encoder_data(uint8_t *frame_data)
 uint16_t get_imu_data(uint8_t *frame_data)
 {
   static uint16_t data_header_len = sizeof(proto_data_header_t);
-  static uint16_t data_content_len = sizeof(proto_imu_data_t);
+  static uint16_t data_content_len = sizeof(proto_data_imu_t);
 
   proto_data_header_t proto_data_header;
   proto_data_header.data_id = DATA_IMU;

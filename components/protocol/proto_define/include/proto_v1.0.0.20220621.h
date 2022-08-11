@@ -65,7 +65,7 @@ typedef struct
 typedef struct
 {
     int32_t motor_encoder[MAX_MOTOR_NUM]; // 电机的编码器数据
-} __attribute__((packed)) proto_motor_encoder_data_t;
+} __attribute__((packed)) proto_data_motor_encoder_t;
 
 /**
  * @brief 数据段头
@@ -96,14 +96,14 @@ typedef struct
     float accel[3]; // 加速度
     float gyro[3];  // 重力加速度
     float euler[3]; // 欧拉角 RPY
-} __attribute__((packed))  proto_imu_data_t;
+} __attribute__((packed))  proto_data_imu_t;
 
 /**
  * @brief 设置IMU数据
  *
- * @param proto_imu_data_t
+ * @param proto_data_imu_t
  */
-void proto_set_imu_data(proto_imu_data_t *proto_imu_data);
+void proto_set_imu_data(proto_data_imu_t *proto_imu_data);
 
 /**
  * @brief 设置电机的编码器数据
@@ -111,13 +111,13 @@ void proto_set_imu_data(proto_imu_data_t *proto_imu_data);
  * @param proto_motor_encoder_data
  */
 void proto_set_motor_encoder_data(
-    proto_motor_encoder_data_t *proto_motor_encoder_data);
+    proto_data_motor_encoder_t *proto_motor_encoder_data);
 
 /**
  * @brief 定义更新PID数据的钩子
  *
  */
-typedef uint8_t (*update_pid_params_fun_t)(proto_pid_data_t *pid);
+typedef uint8_t (*update_pid_params_fun_t)(proto_data_pid_config_t *pid);
 
 /**
  * @brief 注册更新PID数据的钩子函数

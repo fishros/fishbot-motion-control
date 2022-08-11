@@ -78,7 +78,11 @@ typedef struct
   float kp;
   float ki;
   float kd;
-} proto_pid_data_t;
+  float max_output;
+  float min_output;
+  float max_integral;
+  float min_integral;
+} __attribute__((packed)) proto_data_pid_config_t;
 
 /**
  * @brief 电机编码器数据结构体
@@ -87,7 +91,7 @@ typedef struct
 typedef struct
 {
   int32_t motor_encoder[MAX_MOTOR_NUM]; // 电机的编码器数据
-} __attribute__((packed)) proto_motor_encoder_data_t;
+} __attribute__((packed)) proto_data_motor_encoder_t;
 
 /**
  * @brief 电机速度控制结构体
@@ -109,19 +113,19 @@ typedef struct
   float accel[3]; // 加速度
   float gyro[3];  // 重力加速度
   float euler[3]; // 欧拉角 RPY
-} __attribute__((packed)) proto_imu_data_t;
+} __attribute__((packed)) proto_data_imu_t;
 
-/**************************************设备控制数据结构*******************************************/
+/**************************************WIFI配置数据结构*******************************************/
 /**
  * @brief WIFI配置结构体
  *
  */
 typedef struct
 {
-  wifi_mode_t wifi_mode;
+  wifi_mode_t mode;
   char ssid[16];
   char password[24];
-} __attribute__((packed)) proto_wifi_config_t;
+} __attribute__((packed)) proto_data_wifi_config_t;
 
 /**************************************设备控制数据结构*******************************************/
 /**
@@ -154,9 +158,9 @@ typedef struct
 {
   proto_device_id_t id;
   proto_device_operation_t operation;
-} __attribute__((packed)) proto_device_control_t;
+} __attribute__((packed)) proto_data_device_control_t;
 
-/*************************************数据域*通讯模式配置*******************************************/
+/*************************************数据域*通讯模式配置定义*******************************************/
 /**
  * @brief 通讯模式定义
  *
@@ -175,27 +179,12 @@ typedef enum
 typedef struct
 {
   proto_proto_mode_t mode;
-  uint16_t bautrate;
+  uint32_t bautrate;
   uint16_t port;
   char ip[16];
-} __attribute__((packed)) proto_proto_mode_config_t;
+} __attribute__((packed)) proto_data_proto_mode_config_t;
 
-/*************************************本机->主机数据更新相关函数*******************************************/
 
-/**
- * @brief 设置IMU数据
- *
- * @param proto_imu_data_t
- */
-void proto_set_imu_data(proto_imu_data_t *proto_imu_data);
-
-/**
- * @brief 设置电机的编码器数据
- *
- * @param proto_motor_encoder_data
- */
-void proto_set_motor_encoder_data(
-    proto_motor_encoder_data_t *proto_motor_encoder_data);
 
 /*************************************主机->本机数据更新钩子函数*******************************************/
 
@@ -203,7 +192,7 @@ void proto_set_motor_encoder_data(
  * @brief 定义更新PID数据的钩子
  *
  */
-typedef uint8_t (*update_pid_params_fun_t)(proto_pid_data_t *pid);
+typedef uint8_t (*update_pid_params_fun_t)(proto_data_pid_config_t *pid);
 
 /**
  * @brief 注册更新PID数据的钩子函数
@@ -215,15 +204,18 @@ typedef uint8_t (*update_pid_params_fun_t)(proto_pid_data_t *pid);
 bool proto_register_update_pid_fun(
     update_pid_params_fun_t *update_pid_params_fun);
 
+
+/*************************************主机->本机 电机速度更新钩子函数*******************************************/
+
 /**
- * @brief 定义更新速度数据的钩子
+ * @brief STEP1.定义更新电机速度数据的钩子
  *
  */
 typedef uint8_t (*update_speed_params_fun_t)(
     proto_motor_speed_ctrl_data_t *motor_speed);
 
 /**
- * @brief 注册更新电机速度数据的钩子
+ * @brief STEP2: 注册更新电机速度数据的钩子函数
  *
  * @param update_motor_speed_ctrl_fun
  * @return true
@@ -233,11 +225,58 @@ bool proto_register_update_motor_speed_fun(
     update_speed_params_fun_t *update_motor_speed_ctrl_fun);
 
 /**
- * @brief 更新电机目标速度
+ * @brief STEP3: 对外提供更新电机目标速度函数
  *
  * @param motor_speed
  */
 void proto_update_motor_speed(proto_motor_speed_ctrl_data_t *motor_speed);
+
+/*************************************主机->本机 WIFI配置更新相关函数*******************************************/
+
+/**
+ * @brief STEP1.定义更新电机速度数据的钩子
+ *
+ */
+typedef uint8_t (*update_wifi_config_fun_t)(
+    proto_data_wifi_config_t *motor_speed);
+
+/**
+ * @brief STEP2: 注册更新电机速度数据的钩子函数
+ *
+ * @param update_wifi_config_fun
+ * @return true
+ * @return false
+ */
+bool proto_register_update_wifi_config_fun(
+    update_wifi_config_fun_t *update_wifi_config_fun);
+
+/**
+ * @brief STEP3: 对外提供更新电机目标速度函数
+ *
+ * @param wifi_config
+ */
+void proto_update_wifi_config(proto_data_wifi_config_t *wifi_config);
+
+
+/*************************************本机->主机数据更新相关函数*******************************************/
+
+/**
+ * @brief 设置IMU数据
+ *
+ * @param proto_data_imu_t
+ */
+void proto_set_imu_data(proto_data_imu_t *proto_imu_data);
+
+/**
+ * @brief 设置电机的编码器数据
+ *
+ * @param proto_motor_encoder_data
+ */
+void proto_set_motor_encoder_data(
+    proto_data_motor_encoder_t *proto_motor_encoder_data);
+
+
+/*************************************获取和处理一个数据包*******************************************/
 
 /**
  * @brief 解析和获取一帧数据（根据数据调用不同的钩子完成数据的更新到各个模块）
@@ -254,5 +293,8 @@ uint16_t proto_deal_frame_data(protocol_package_t *protocol_package);
  * @return uint16_t
  */
 uint16_t proto_get_upload_frame(protocol_package_t **protocol_package);
+
+
+
 
 #endif // _PROTO_V1_0_0_220621_H_

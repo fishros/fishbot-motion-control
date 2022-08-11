@@ -40,7 +40,7 @@ static rotary_encoder_t *rotary_encoder_[MAX_MOTOR_NUM]; // 编码器配置
 static int16_t target_speeds[MAX_MOTOR_NUM] = {0, 0}; // 电机当前速度，单位mm/s
 static uint16_t tick_to_mms[MAX_MOTOR_NUM] = {
     62.011394, 62.011394}; // 电机的编码器和距离换算出的值
-static proto_motor_encoder_data_t
+static proto_data_motor_encoder_t
     proto_motor_encoder_data_; // 上传存储的编码器数据
 
 
@@ -53,7 +53,7 @@ bool set_motor_config(uint8_t motor_num, motor_config_t *motor_configs,
     return true;
 }
 
-uint8_t update_motor_pid_param(proto_pid_data_t *proto_pid_data)
+uint8_t update_motor_pid_param(fishbot_pid_config_t *proto_pid_data)
 {
     // pid_update_parameters(pid_ctrl_block_handle_[0],);
     return true;

@@ -8,6 +8,8 @@
 #include "wifi.h"
 
 #define FISHBOT_MODLUE "WIFI"
+#define DEFAULT_WIFI_AP_PSWD "fishros.com"
+#define DEFAULT_WIFI_AP_SSID_PREFIX "FISHBOT"
 
 static fishbot_wifi_config_t *wifi_config_ = NULL;
 
@@ -25,7 +27,8 @@ static void event_handler(void *arg, esp_event_base_t event_base,
     {
         esp_wifi_connect();
     }
-    else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)
+    else if (event_base == WIFI_EVENT &&
+             event_id == WIFI_EVENT_STA_DISCONNECTED)
     {
         // if (s_retry_num < 3) {
         wifi_status_ = WIFI_STATUS_STA_DISCONECTED;
@@ -46,13 +49,15 @@ static void event_handler(void *arg, esp_event_base_t event_base,
     }
     else if (event_id == WIFI_EVENT_AP_STACONNECTED)
     {
-        wifi_event_ap_staconnected_t *event = (wifi_event_ap_staconnected_t *)event_data;
+        wifi_event_ap_staconnected_t *event =
+            (wifi_event_ap_staconnected_t *)event_data;
         ESP_LOGI(FISHBOT_MODLUE, "station " MACSTR " join, AID=%d",
                  MAC2STR(event->mac), event->aid);
     }
     else if (event_id == WIFI_EVENT_AP_STADISCONNECTED)
     {
-        wifi_event_ap_stadisconnected_t *event = (wifi_event_ap_stadisconnected_t *)event_data;
+        wifi_event_ap_stadisconnected_t *event =
+            (wifi_event_ap_stadisconnected_t *)event_data;
         ESP_LOGI(FISHBOT_MODLUE, "station " MACSTR " leave, AID=%d",
                  MAC2STR(event->mac), event->aid);
     }
@@ -79,23 +84,22 @@ bool wifi_set_as_ap(char *ssid, char *pswd)
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
     ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
-                                                        ESP_EVENT_ANY_ID,
-                                                        &event_handler,
-                                                        NULL,
-                                                        NULL));
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(
+        WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, NULL));
 
     wifi_config_t wifi_config = {
-        .ap = {
-            .max_connection = WIF_MAX_AP_CONNECTION,
-            .authmode = WIFI_AUTH_WPA_WPA2_PSK,
-        },
+        .ap =
+            {
+                .max_connection = WIF_MAX_AP_CONNECTION,
+                .authmode = WIFI_AUTH_WPA_WPA2_PSK,
+            },
     };
 
     ESP_ERROR_CHECK(esp_wifi_get_mac(ESP_IF_WIFI_AP, mac));
-    wifi_config.ap.ssid_len = sprintf((char *)wifi_config.ap.ssid, "%s_%02X%02X", ssid, mac[0], mac[1]);
-    // sprintf(ssid, "%s_%02X%02X%02X%02X%02X%02X", ssid, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-    // strcpy((char *)wifi_config.ap.ssid, ssid);
+    wifi_config.ap.ssid_len =
+        sprintf((char *)wifi_config.ap.ssid, "%s_%02X%02X", ssid, mac[0], mac[1]);
+    // sprintf(ssid, "%s_%02X%02X%02X%02X%02X%02X", ssid, mac[0], mac[1], mac[2],
+    // mac[3], mac[4], mac[5]); strcpy((char *)wifi_config.ap.ssid, ssid);
     strcpy((char *)wifi_config.ap.password, pswd);
 
     if (strlen(pswd) == 0)
@@ -116,9 +120,10 @@ bool wifi_set_as_ap(char *ssid, char *pswd)
 bool wifi_set_as_sta(char *ssid, char *password)
 {
     wifi_config_t wifi_config = {
-        .sta = {
-            .threshold.authmode = WIFI_AUTH_WPA2_PSK,
-        },
+        .sta =
+            {
+                .threshold.authmode = WIFI_AUTH_WPA2_PSK,
+            },
     };
     strcpy((char *)wifi_config.ap.ssid, ssid);
     strcpy((char *)wifi_config.ap.password, password);
@@ -130,16 +135,10 @@ bool wifi_set_as_sta(char *ssid, char *password)
     esp_wifi_set_ps(WIFI_PS_NONE);
     esp_event_handler_instance_t instance_any_id;
     esp_event_handler_instance_t instance_got_ip;
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
-                                                        ESP_EVENT_ANY_ID,
-                                                        &event_handler,
-                                                        NULL,
-                                                        &instance_any_id));
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
-                                                        IP_EVENT_STA_GOT_IP,
-                                                        &event_handler,
-                                                        NULL,
-                                                        &instance_got_ip));
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(
+        WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, &instance_any_id));
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(
+        IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL, &instance_got_ip));
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
@@ -147,19 +146,19 @@ bool wifi_set_as_sta(char *ssid, char *password)
 
     ESP_LOGI(FISHBOT_MODLUE, "wifi_init_sta finished.");
 
-    /* Waiting until either the connection is established (WIFI_CONNECTED_BIT) or connection failed for the maximum
-     * number of re-tries (WIFI_FAIL_BIT). The bits are set by event_handler() (see above) */
-    EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group,
-                                           WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
-                                           pdFALSE,
-                                           pdFALSE,
-                                           10 * 1000 / portTICK_RATE_MS);
+    /* Waiting until either the connection is established (WIFI_CONNECTED_BIT) or
+     * connection failed for the maximum number of re-tries (WIFI_FAIL_BIT). The
+     * bits are set by event_handler() (see above) */
+    EventBits_t bits = xEventGroupWaitBits(
+        s_wifi_event_group, WIFI_CONNECTED_BIT | WIFI_FAIL_BIT, pdFALSE, pdFALSE,
+        10 * 1000 / portTICK_RATE_MS);
 
-    /* xEventGroupWaitBits() returns the bits before the call returned, hence we can test which event actually
-     * happened. */
+    /* xEventGroupWaitBits() returns the bits before the call returned, hence we
+     * can test which event actually happened. */
     if (bits & WIFI_CONNECTED_BIT)
     {
-        ESP_LOGI(FISHBOT_MODLUE, "connected to ap SSID:%s password:%s", wifi_config.ap.ssid, wifi_config.ap.password);
+        ESP_LOGI(FISHBOT_MODLUE, "connected to ap SSID:%s password:%s",
+                 wifi_config.ap.ssid, wifi_config.ap.password);
     }
     else if (bits & WIFI_FAIL_BIT)
     {
@@ -172,8 +171,10 @@ bool wifi_set_as_sta(char *ssid, char *password)
     }
 
     /* The event will not be processed after unregister */
-    ESP_ERROR_CHECK(esp_event_handler_instance_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, instance_got_ip));
-    ESP_ERROR_CHECK(esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, instance_any_id));
+    ESP_ERROR_CHECK(esp_event_handler_instance_unregister(
+        IP_EVENT, IP_EVENT_STA_GOT_IP, instance_got_ip));
+    ESP_ERROR_CHECK(esp_event_handler_instance_unregister(
+        WIFI_EVENT, ESP_EVENT_ANY_ID, instance_any_id));
     vEventGroupDelete(s_wifi_event_group);
     if (wifi_status_ != WIFI_STATUS_STA_CONNECTED)
     {
@@ -196,19 +197,23 @@ bool wifi_init()
     // bool result;
     if (wifi_config_->mode == WIFI_MODE_STA)
     {
-        ESP_LOGI(FISHBOT_MODLUE, "wifi init with sta mode, ssid:%s pswd:%s", wifi_config_->ssid, wifi_config_->pswd);
-        wifi_set_as_sta(wifi_config_->ssid, wifi_config_->pswd);
+        ESP_LOGI(FISHBOT_MODLUE, "wifi init with sta mode, ssid:%s pswd:%s",
+                 wifi_config_->ssid, wifi_config_->password);
+        wifi_set_as_sta(wifi_config_->ssid, wifi_config_->password);
     }
     if (wifi_config_->mode == WIFI_MODE_AP)
     {
-        ESP_LOGI(FISHBOT_MODLUE, "wifi init with ap mode, ssid:%s pswd:%s", wifi_config_->ap_ssid, wifi_config_->ap_pswd);
-        wifi_set_as_ap(wifi_config_->ap_ssid, wifi_config_->ap_pswd);
+        ESP_LOGI(FISHBOT_MODLUE, "wifi init with ap mode, ssid:%s pswd:%s",
+                DEFAULT_WIFI_AP_SSID_PREFIX, DEFAULT_WIFI_AP_PSWD);
+        wifi_set_as_ap(DEFAULT_WIFI_AP_SSID_PREFIX, DEFAULT_WIFI_AP_PSWD);
     }
     // 初始化失败情况下自动选择ap模式
     if (wifi_status_ == WIFI_STATUS_STA_DISCONECTED)
     {
-        ESP_LOGI(FISHBOT_MODLUE, "wifi init falied! try with ap mode, ssid:%s pswd:%s", wifi_config_->ap_ssid, wifi_config_->ap_pswd);
-        wifi_set_as_ap(wifi_config_->ap_ssid, wifi_config_->ap_pswd);
+        ESP_LOGI(FISHBOT_MODLUE,
+                 "wifi init falied! try with ap mode, ssid:%s pswd:%s",
+                 DEFAULT_WIFI_AP_SSID_PREFIX, DEFAULT_WIFI_AP_PSWD);
+        wifi_set_as_ap(DEFAULT_WIFI_AP_SSID_PREFIX, DEFAULT_WIFI_AP_PSWD);
     }
 
     ESP_LOGI(FISHBOT_MODLUE, "init success!");

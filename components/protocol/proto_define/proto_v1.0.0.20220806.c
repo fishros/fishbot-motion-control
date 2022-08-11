@@ -1,18 +1,38 @@
 #include "proto_v1.0.0.20220806.h"
 
-static update_pid_params_fun_t update_pid_params_fun_;
-static update_speed_params_fun_t update_speed_params_fun_;
-
 static protocol_package_t protocol_package_;
-static proto_motor_encoder_data_t *proto_motor_encoder_data_;
-static proto_imu_data_t *proto_imu_data_;
+static proto_data_motor_encoder_t *proto_motor_encoder_data_;
+static proto_data_imu_t *proto_imu_data_;
 
+/**********************************更新WIFI配置的函数************************************/
+static update_wifi_config_fun_t update_wifi_config_fun_;
+
+bool proto_register_update_wifi_config_fun(
+    update_wifi_config_fun_t *update_wifi_config_fun)
+{
+  update_wifi_config_fun_ = update_wifi_config_fun;
+  return true;
+}
+
+void proto_update_wifi_config(proto_data_wifi_config_t *wifi_config)
+{
+  update_wifi_config_fun_(wifi_config);
+}
+/**********************************更新WIFI配置的函数************************************/
+
+/**********************************更新PID配置的函数************************************/
+
+static update_pid_params_fun_t update_pid_params_fun_;
 bool proto_register_update_pid_fun(
     update_pid_params_fun_t *update_pid_params_fun)
 {
   update_pid_params_fun_ = update_pid_params_fun;
   return true;
 }
+/**********************************更新PID配置的函数************************************/
+
+/**********************************更新电机速度的函数************************************/
+static update_speed_params_fun_t update_speed_params_fun_;
 
 bool proto_register_update_motor_speed_fun(
     update_speed_params_fun_t *update_motor_speed_ctrl_fun)
@@ -25,17 +45,21 @@ void proto_update_motor_speed(proto_motor_speed_ctrl_data_t *motor_speed)
 {
   update_speed_params_fun_(motor_speed);
 }
+/**********************************更新电机速度的函数************************************/
+
+/**********************************设置传感器数据的函数************************************/
 
 void proto_set_motor_encoder_data(
-    proto_motor_encoder_data_t *proto_motor_encoder_data)
+    proto_data_motor_encoder_t *proto_motor_encoder_data)
 {
   proto_motor_encoder_data_ = proto_motor_encoder_data;
 }
 
-void proto_set_imu_data(proto_imu_data_t *proto_imu_data)
+void proto_set_imu_data(proto_data_imu_t *proto_imu_data)
 {
   proto_imu_data_ = proto_imu_data;
 }
+/**********************************设置传感器数据的函数************************************/
 
 uint16_t proto_deal_frame_data(protocol_package_t *protocol_package)
 {
@@ -48,14 +72,14 @@ uint16_t proto_deal_frame_data(protocol_package_t *protocol_package)
 
 /**
  * @brief 将编码器数据转换成数据帧
- * 
- * @param frame_data 
- * @return uint16_t 
+ *
+ * @param frame_data
+ * @return uint16_t
  */
 uint16_t get_encoder_data(uint8_t *frame_data)
 {
   static uint16_t data_header_len = sizeof(proto_data_header_t);
-  static uint16_t data_content_len = sizeof(proto_motor_encoder_data_t);
+  static uint16_t data_content_len = sizeof(proto_data_motor_encoder_t);
 
   proto_data_header_t proto_data_header;
   proto_data_header.data_id = DATA_ENCODER;
@@ -73,7 +97,7 @@ uint16_t get_encoder_data(uint8_t *frame_data)
 uint16_t get_imu_data(uint8_t *frame_data)
 {
   static uint16_t data_header_len = sizeof(proto_data_header_t);
-  static uint16_t data_content_len = sizeof(proto_imu_data_t);
+  static uint16_t data_content_len = sizeof(proto_data_imu_t);
 
   proto_data_header_t proto_data_header;
   proto_data_header.data_id = DATA_IMU;

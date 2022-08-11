@@ -1,6 +1,6 @@
-set(component_srcs "udp_client_protocol.c")
+set(component_srcs "proto_v1.0.0.20220806.c")
 
 idf_component_register(SRCS "${component_srcs}"
                        INCLUDE_DIRS "include"
                        PRIV_INCLUDE_DIRS ""
-                       REQUIRES proto_utils proto_define)
+                       REQUIRES proto_utils)

@@ -33,8 +33,8 @@ bool fishbot_task_init(void)
     motor_task_init();
     // mpu6050_task();
     protocol_task_init();
-    esp_log_level_set("MPU6050",ESP_LOG_NONE); // 不输出IMU模块日志
-    esp_log_level_set("PROTOCOL",ESP_LOG_NONE); // 不输出PROTOCOL模块日志
+    esp_log_level_set("MPU6050", ESP_LOG_NONE);  // 不输出IMU模块日志
+    esp_log_level_set("PROTOCOL", ESP_LOG_NONE); // 不输出PROTOCOL模块日志
     return true;
 }
 
