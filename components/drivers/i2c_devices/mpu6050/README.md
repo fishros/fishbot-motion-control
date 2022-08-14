@@ -4,12 +4,14 @@ Code provided in this repository is a MPU6050 library for ESP 32.
 
 ## Table of Contents
 
-- [Components](#components)
-  - [ESP 32](#esp-32)
-  - [ESP-IDF](#esp-idf)
-  - [MPU-6050](#mpu-6050)
-- [Quick Start](#quick-start)
-- [Acknowledgments](#acknowledgments)
+- [ESP32 MPU6050](#esp32-mpu6050)
+  - [Table of Contents](#table-of-contents)
+  - [Components](#components)
+    - [ESP 32](#esp-32)
+    - [ESP-IDF](#esp-idf)
+    - [MPU-6050](#mpu-6050)
+  - [Quick Start](#quick-start)
+  - [Acknowledgments](#acknowledgments)
 
 ## Components
 

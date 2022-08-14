@@ -13,8 +13,7 @@
 
 #include "mpu6050.h"
 #include <string.h>
-#include "MadgwickAHRS/MadgwickAHRS.h"
-#include "MahonyAHRS/MahonyAHRS.h"
+
 
 #define FISHBOT_MODLUE "MPU6050"
 
@@ -32,7 +31,7 @@ const char *TAG_MPU6050 = "MPU6050";
 #define gyroCofe 0.98
 #define accCofe 0.02
 //---------AHRS算法所用参数-------
-#define sampleFreq	200.0f			// sample frequency in Hz
+#define sampleFreq	50.0f			// sample frequency in Hz
 #define twoKpDef	(2.0f * 0.5f)	// 2 * proportional gain
 #define twoKiDef	(2.0f * 0.0f)	// 2 * integral gain
 volatile float twoKp = twoKpDef;											// 2 * proportional gain (Kp)
@@ -43,9 +42,13 @@ volatile float integralFBx = 0.0f,  integralFBy = 0.0f, integralFBz = 0.0f;	// i
 float quart[4]={1.0f,0.0f,0.0f,0.0f};
 
 float now_t,past_t;
-float pitch, yaw, roll;
+float pitch1, yaw1, roll1;
+float pitch2, yaw2, roll2;
+float yaw;
 int last_update = 0, first_update = 0, now = 0;
-
+float yaw_buf[10],yaw1_,yaw11;
+int yaw_filter_time;
+int yaw_filter_flag;
 float accoffset[3],gyrooffset[3];
 int16_t accel_[3],gyro_[3];
 int16_t accel_bias_res[3],gyro_bias_res[3];
@@ -3001,7 +3004,7 @@ void mpu6050_madgwick_quaternion_update(
     uint64_t now_time = 0, prev_time = 0;
 
     // Normalise accelerometer measurement:
-    norm = sqrt(accel_x * accel_x + accel_y * accel_y + accel_z * accel_z);
+    norm = invSqrt(accel_x * accel_x + accel_y * accel_y + accel_z * accel_z);
     
     // Handle NaN:
     if (norm == 0.0f)
@@ -3030,7 +3033,7 @@ void mpu6050_madgwick_quaternion_update(
     hat_dot_4 = j_14o21 * func_1 + j_11o24 * func_2;
 
     // Normalize the gradient:
-    norm = sqrt(hat_dot_1 * hat_dot_1 + hat_dot_2 * hat_dot_2 + hat_dot_3 * hat_dot_3 + hat_dot_4 * hat_dot_4);
+    norm = invSqrt(hat_dot_1 * hat_dot_1 + hat_dot_2 * hat_dot_2 + hat_dot_3 * hat_dot_3 + hat_dot_4 * hat_dot_4);
     hat_dot_1 /= norm;
     hat_dot_2 /= norm;
     hat_dot_3 /= norm;
@@ -3042,9 +3045,9 @@ void mpu6050_madgwick_quaternion_update(
     gyro_z_err = double_q1 * hat_dot_4 - double_q2 * hat_dot_3 + double_q3 * hat_dot_2 - double_q4 * hat_dot_1;
 
     // Compute and remove gyroscope biases:
-    gyro_x_bias += gyro_x_err * delta_t * ZETA;
-    gyro_y_bias += gyro_y_err * delta_t * ZETA;
-    gyro_z_bias += gyro_z_err * delta_t * ZETA;
+    gyro_x_bias += gyro_x_err * interval * ZETA;
+    gyro_y_bias += gyro_y_err * interval * ZETA;
+    gyro_z_bias += gyro_z_err * interval * ZETA;
 
     // Compute the quaternion derivative:
     q_dot_1 = -half_q2 * gyro_x - half_q3 * gyro_y - half_q4 * gyro_z;
@@ -3053,17 +3056,54 @@ void mpu6050_madgwick_quaternion_update(
     q_dot_4 = half_q1 * gyro_z + half_q2 * gyro_y - half_q3 * gyro_x;
     //ESP_LOGI(FISHBOT_MODLUE, "1111 q0:%.3f,q1:%.3f,q2:%.3f,q3:%.3f",q_dot_1,q_dot_2,q_dot_3,q_dot_4);
     // Compute then integrate estimated quaternion derivative:
-    quart[0] += (q_dot_1 - (BETA * hat_dot_1)) * delta_t;
-    quart[1] += (q_dot_2 - (BETA * hat_dot_2)) * delta_t;
-    quart[2] += (q_dot_3 - (BETA * hat_dot_3)) * delta_t;
-    quart[3] += (q_dot_4 - (BETA * hat_dot_4)) * delta_t;
+    quart[0] += (q_dot_1 - (BETA * hat_dot_1)) * interval;
+    quart[1] += (q_dot_2 - (BETA * hat_dot_2)) * interval;
+    quart[2] += (q_dot_3 - (BETA * hat_dot_3)) * interval;
+    quart[3] += (q_dot_4 - (BETA * hat_dot_4)) * interval;
     // Normalize the quaternion:
-    norm = sqrt(quart[0] * quart[0] + quart[1] * quart[1] + quart[2] * quart[2] + quart[3] * quart[3]);
+    norm = invSqrt(quart[0] * quart[0] + quart[1] * quart[1] + quart[2] * quart[2] + quart[3] * quart[3]);
     norm = 1.0f / norm;
     quart[0] *= norm;
     quart[1] *= norm;
     quart[2] *= norm;
     quart[3] *= norm;
+
+    yaw1= -atan2(2 * q1 * q2 + 2 * q0* q3, -2 * q2*q2 - 2 * q3 * q3 + 1)*57.3 + 180; // yaw        -pi----pi
+    // pitch= -asin(-2 * q1 * q3 + 2 * q0 * q2)*57.3; // pitch    -pi/2    --- pi/2 
+    // roll= atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2* q2 + 1)*57.3; // roll       -pi-----pi 
+
+	//ESP_LOGI("FISHBOT_MODLUE","q0:%.3f,q1:%.3f,q2:%.3f,q3:%.3f",q0,q1,q2,q3);
+    //ESP_LOGI("FISHBOT_MODLUE","yaw:%.3f,",yaw1);
+    yaw_buf[0] = yaw1;
+    if(abs(yaw_buf[9]-yaw_buf[0])<=0.0001)
+    {
+        //ESP_LOGI("FISHBOT_MODLUE","gogogogogo");
+        yaw_filter_time++;
+        if(yaw_filter_time > 2000)
+        {
+            
+           if(yaw_filter_flag == 0)
+           {
+            yaw1_ = yaw1; 
+            yaw_filter_flag = 1;
+            ESP_LOGI(FISHBOT_MODLUE," The filter process is over");
+           }
+        }
+        else
+        {
+            ESP_LOGI(FISHBOT_MODLUE,"filtering Rest %d",2000-yaw_filter_time);
+        }
+
+    }
+    for(int i=9;i>0;i--)
+    {
+        yaw_buf[i] = yaw_buf[i-1];
+    }
+    //ESP_LOGI("FISHBOT_MODLUE","yaw9:%f   yaw0:%f,  time:%d ",yaw_buf[9],yaw_buf[0],yaw_filter_time);
+    yaw11 = yaw1 - yaw1_;
+    while(yaw11 < 0 ) yaw11 += 360;
+    while(yaw11 > 360 ) yaw11 -=360;
+    //ESP_LOGI("FISHBOT_MODLUE","yaw:%.3f,",yaw11);
 
 }
 
@@ -3133,12 +3173,42 @@ void MahonyAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float
 	q3 *= recipNorm;
 
 
-	yaw= -atan2(2 * q1 * q2 + 2 * q0* q3, -2 * q2*q2 - 2 * q3 * q3 + 1)*57.3; // yaw        -pi----pi
-    pitch= -asin(-2 * q1 * q3 + 2 * q0 * q2)*57.3; // pitch    -pi/2    --- pi/2 
-    roll= atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2* q2 + 1)*57.3; // roll       -pi-----pi 
+	yaw1= -atan2(2 * q1 * q2 + 2 * q0* q3, -2 * q2*q2 - 2 * q3 * q3 + 1)*57.3 + 180; // yaw        -pi----pi
+    // pitch= -asin(-2 * q1 * q3 + 2 * q0 * q2)*57.3; // pitch    -pi/2    --- pi/2 
+    // roll= atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2* q2 + 1)*57.3; // roll       -pi-----pi 
 
 	//ESP_LOGI("FISHBOT_MODLUE","q0:%.3f,q1:%.3f,q2:%.3f,q3:%.3f",q0,q1,q2,q3);
-    ESP_LOGI("FISHBOT_MODLUE","pitch:%.3f,roll:%.3f,yaw:%.3f,",pitch,roll,yaw);
+    //ESP_LOGI("FISHBOT_MODLUE","yaw:%.3f,",yaw1);
+    yaw_buf[0] = yaw1;
+    if(abs(yaw_buf[9]-yaw_buf[0])<=0.0001)
+    {
+        //ESP_LOGI("FISHBOT_MODLUE","gogogogogo");
+        yaw_filter_time++;
+        if(yaw_filter_time > 2000)
+        {
+            
+           if(yaw_filter_flag == 0)
+           {
+            yaw1_ = yaw1; 
+            yaw_filter_flag = 1;
+            ESP_LOGI(FISHBOT_MODLUE," The filter process is over");
+           }
+        }
+        else
+        {
+            ESP_LOGI(FISHBOT_MODLUE,"filtering Rest %d",2000-yaw_filter_time);
+        }
+
+    }
+    for(int i=9;i>0;i--)
+    {
+        yaw_buf[i] = yaw_buf[i-1];
+    }
+    //ESP_LOGI("FISHBOT_MODLUE","yaw9:%f   yaw0:%f,  time:%d ",yaw_buf[9],yaw_buf[0],yaw_filter_time);
+    yaw11 = yaw1 - yaw1_;
+    while(yaw11 < 0 ) yaw11 += 360;
+    while(yaw11 > 360 ) yaw11 -=360;
+    //ESP_LOGI("FISHBOT_MODLUE","yaw:%.3f,",yaw11);
 }
 
 
@@ -3180,7 +3250,7 @@ bool mpu6050_task_init()
         gyrooffset[0] += ((float)accel_bias_res[0]) / Gyro_Gain;
         gyrooffset[1] += ((float)accel_bias_res[1]) / Gyro_Gain;
         gyrooffset[2] += ((float)accel_bias_res[2]) / Gyro_Gain;
-        ESP_LOGI(FISHBOT_MODLUE, "i:%d.",i);
+        ESP_LOGI(FISHBOT_MODLUE,"Calculate bias,  Rest %d",filter_time-i);
     }
         accoffset[0] = (accoffset[0]) / filter_time;
         accoffset[1] = (accoffset[1]) / filter_time;
@@ -3189,7 +3259,20 @@ bool mpu6050_task_init()
         gyrooffset[1] = (gyrooffset[1]) / filter_time;
         gyrooffset[2] = (gyrooffset[2]) / filter_time;
 
-    ESP_LOGI(FISHBOT_MODLUE, "mpu6050 task init success !.");
+        while(yaw_filter_flag == 0)
+        {
+            mpu6050_get_motion(accel_,gyro_);  //原始数据，没有处理
+            accX = ((float)-accel_[0]) / Acc_Gain;
+            accY = ((float)-accel_[1]) / Acc_Gain;
+            accZ = ((float)-accel_[2]) / Acc_Gain;
+
+            gyroX = (((float)gyro_[0]) / Gyro_Gain)-gyrooffset[0];
+            gyroY = (((float)gyro_[1]) / Gyro_Gain)-gyrooffset[1];
+            gyroZ = (((float)gyro_[2]) / Gyro_Gain)-gyrooffset[2];
+            MahonyAHRSupdateIMU(gyroX * GYRO_MEAS_DRIFT,gyroY * GYRO_MEAS_DRIFT,gyroZ * GYRO_MEAS_DRIFT,accX,accY,accZ);
+        }
+
+        ESP_LOGI(FISHBOT_MODLUE, "mpu6050 task init success !.");
 
     return true;
 }
@@ -3218,20 +3301,45 @@ void get_mpu6050_euler_angle(void *param)
         angleGyroY += gyroY * interval;
         angleGyroZ += gyroZ * interval;
 
-        pitch = (gyroCofe * (angleX + gyroX * interval)) + (accCofe * angleAccX);
-        roll = (gyroCofe * (angleY + gyroY * interval)) + (accCofe * angleAccY);
-        yaw = angleGyroZ;
+        pitch2 = (gyroCofe * (angleX + gyroX * interval)) + (accCofe * angleAccX);
+        roll2 = (gyroCofe * (angleY + gyroY * interval)) + (accCofe * angleAccY);
+        yaw2= angleGyroZ;
 
-        while(yaw < 0 ) yaw += 360;
-        while(yaw > 360 ) yaw -=360;
+        while(yaw2 < 0 ) yaw2 += 360;
+        while(yaw2 > 360 ) yaw2 -=360;
 
-        ESP_LOGI(FISHBOT_MODLUE,"pitch:%.3f,roll:%.3f,yaw:%.3f",pitch,roll,yaw);
+        
+        //mpu6050_madgwick_quaternion_update(accX,accY,accZ,gyroX * GYRO_MEAS_DRIFT,gyroY * GYRO_MEAS_DRIFT,gyroZ * GYRO_MEAS_DRIFT);
+        MahonyAHRSupdateIMU(gyroX * GYRO_MEAS_DRIFT,gyroY * GYRO_MEAS_DRIFT,gyroZ * GYRO_MEAS_DRIFT,accX,accY,accZ);
+        //滤波，对yaw2做一个消除零点的处理
+        if((yaw11 > 180) && (yaw2 > 180) )
+        {
+            yaw = yaw11 * 0.3 + yaw2 * 0.7; 
+        }
+        else if((yaw11 < 180) && (yaw2 < 180))
+        {
+            yaw = yaw11 * 0.3 + yaw2 * 0.7; 
+        }
+        else if((yaw11 > 340) && (yaw2 < 20) )
+        {
+            yaw = (360 - yaw11) * 0.3 + yaw2 * 0.7;
+        }
+        else if((yaw11 < 20) && (yaw2 > 340) )
+        {
+            yaw = (360 - yaw2) * 0.7 + yaw11 * 0.3;
+        }
+        vTaskDelay(20 / portTICK_RATE_MS);
+
+        ESP_LOGI(FISHBOT_MODLUE,"yaw:%.3f yaw11:%.3f yaw2:%.3f",yaw,yaw11,yaw2);
 
         prev_time = now_time;
     }
 
     
 }
+
+
+
 void mpu6050_task(void)
 {
     

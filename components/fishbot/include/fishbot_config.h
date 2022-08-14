@@ -13,6 +13,7 @@
 #include "pid_controller.h"
 #include "rotary_encoder.h"
 #include "oled.h"
+#include "mpu9250.h" 
 #include "mpu6050.h"
 #include "wifi.h"
 #include "protocol.h"

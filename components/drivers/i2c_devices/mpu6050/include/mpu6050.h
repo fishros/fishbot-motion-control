@@ -2366,4 +2366,6 @@ void mpu6050_task(void);
  */
 void get_mpu6050_euler_angle(void *param);
 
+void KalmanCalculation(void);
+
 #endif

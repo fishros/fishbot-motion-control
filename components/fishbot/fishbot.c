@@ -30,7 +30,7 @@ bool fishbot_task_init(void)
     led_task_init();
     //motor_task_init(); //电机功能
     //protocol_task_init();
-    mpu6050_task();
+    mpu6050_task();  
     return true;
 }
 
@@ -46,8 +46,10 @@ bool fishbot_init_hardware(void)
         return false;
     if (!mpu6050_task_init())
         return false; 
-    if (!wifi_init())
-        return false;
+    // if (!mpu9250_task_init())
+    //     return false;
+    // if (!wifi_init())
+    //     return false;
     // if (!protocol_init()) //这个地方暂时初始化不通过 
     //     return false;       
     char host[16];
