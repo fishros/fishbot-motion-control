@@ -40,6 +40,7 @@ bool fishbot_task_init(void)
 
 bool fishbot_init_hardware(void)
 {
+    key_init();
     if (!led_init())
         return false;
     if (!motor_init())

@@ -38,6 +38,14 @@ bool set_udp_server_config();
 bool udp_server_protocol_init(xQueueHandle *rx_queue, xQueueHandle *tx_queue);
 
 /**
+ * @brief 启动UDP数据接收任务
+ * 
+ * @return true 
+ * @return false 
+ */
+bool udp_server_protocol_recv_task_init(void);
+
+/**
  * @brief UDP服务端收发任务初始化
  *
  * @return true

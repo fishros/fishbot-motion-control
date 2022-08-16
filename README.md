@@ -35,6 +35,10 @@ docker run -it  --rm --privileged -v=/dev:/dev  -v `pwd`:`pwd` -w `pwd` espressi
 esptool.py -p /dev/ttyS12 -b 921600  --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 40m --flash_size 4MB 0x1000 bootloader/bootloader.bin 0x10000 main.bin 0x8000 partition_table/partition-table.bin
 ```
 
+### Merge
+```
+docker run -it --rm --privileged -v=/dev:/dev  -v `pwd`:`pwd` -w `pwd` fishros2/fishbot-tool esptool.py --chip ESP8266 merge_bin -o fishbot_motion_control_v1.0.0.`date +%y%m%d`.bin --flash_mode dio --flash_size 4MB 0x1000 build/bootloader/bootloader.bin 0x8000 build/partition_table/partition-table.bin 0x10000 build/main.bin
+```
 
 ## 工程介绍
 

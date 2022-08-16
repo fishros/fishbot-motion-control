@@ -164,3 +164,10 @@ bool uart_protocol_task_init(void)
                 NULL); //发送任务
     return true;
 }
+
+bool uart_protocol_recv_task_init(void)
+{
+    xTaskCreate(uart_rx_task, "uart_rx_task", 1024 * 2, NULL, 5,
+                NULL); //接收任务
+    return true;
+}

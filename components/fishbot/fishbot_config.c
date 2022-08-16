@@ -105,7 +105,7 @@ bool fishbot_first_startup_config_init()
     else
     {
         nvs_read_struct(WIFI_MODE_COONFIG_NAME, &wifi_config, sizeof(fishbot_wifi_config_t));
-        // nvs_read_struct(PROTO_COONFIG_NAME, &protocol_config, sizeof(fishbot_proto_config_t));
+        nvs_read_struct(PROTO_COONFIG_NAME, &protocol_config, sizeof(fishbot_proto_config_t));
     }
     return true;
 }
@@ -124,10 +124,20 @@ uint8_t fishbot_update_wifi_config(fishbot_wifi_config_t *fishbot_wifi_config)
     return true;
 }
 
+uint8_t fishbot_update_proto_config(fishbot_proto_config_t *fishbot_proto_config)
+{
+    // 将更新后的配置写入数据库
+    nvs_write_struct(PROTO_COONFIG_NAME, fishbot_proto_config, sizeof(fishbot_proto_config_t));
+    return true;
+}
+
+
+
 bool fishbot_config_init()
 {
     /*读取配置，若是初次上电则初始化数据库*/
     fishbot_first_startup_config_init();
+    
     set_wifi_config(&wifi_config);
     set_protocol_config(&protocol_config);
 
@@ -138,6 +148,7 @@ bool fishbot_config_init()
     /*注册数据更新回调函数*/
     proto_register_update_pid_fun(fishbot_update_motor_pid_param);
     proto_register_update_wifi_config_fun(fishbot_update_wifi_config);
+    proto_register_update_potocol_config_fun(fishbot_update_proto_config);
 
     return true;
 }

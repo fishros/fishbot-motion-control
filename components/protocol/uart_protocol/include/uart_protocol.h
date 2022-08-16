@@ -40,3 +40,11 @@ bool uart_protocol_init(xQueueHandle *rx_queue, xQueueHandle *tx_queue);
  * @return false
  */
 bool uart_protocol_task_init(void);
+
+/**
+ * @brief 初始化串口数据接收任务
+ * 
+ * @return true 
+ * @return false 
+ */
+bool uart_protocol_recv_task_init(void);
