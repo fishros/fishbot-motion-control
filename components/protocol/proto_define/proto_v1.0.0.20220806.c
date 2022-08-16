@@ -4,6 +4,23 @@ static protocol_package_t protocol_package_;
 static proto_data_motor_encoder_t *proto_motor_encoder_data_;
 static proto_data_imu_t *proto_imu_data_;
 
+/**********************************更新PROTOCOL配置的函数************************************/
+static update_protocol_config_fun_t update_protocol_config_fun_;
+
+bool proto_register_update_potocol_config_fun(
+    update_protocol_config_fun_t *update_protocol_config_fun)
+{
+  update_protocol_config_fun_ = update_protocol_config_fun;
+  return true;
+}
+
+void proto_update_potocol_mode_config(
+    proto_data_proto_mode_config_t *protocol_config)
+{
+  update_protocol_config_fun_(protocol_config);
+}
+/**********************************更新PROTOCOL配置的函数************************************/
+
 /**********************************更新WIFI配置的函数************************************/
 static update_wifi_config_fun_t update_wifi_config_fun_;
 
@@ -105,8 +122,7 @@ uint16_t get_imu_data(uint8_t *frame_data)
   proto_data_header.data_direction = DATA_TO_MASTER;
 
   memcpy(frame_data, &proto_data_header, data_header_len);
-  memcpy(frame_data + data_header_len, proto_imu_data_,
-         data_content_len);
+  memcpy(frame_data + data_header_len, proto_imu_data_, data_content_len);
 
   return data_header_len + data_content_len;
 }

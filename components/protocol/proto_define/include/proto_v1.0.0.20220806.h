@@ -204,6 +204,35 @@ typedef uint8_t (*update_pid_params_fun_t)(proto_data_pid_config_t *pid);
 bool proto_register_update_pid_fun(
     update_pid_params_fun_t *update_pid_params_fun);
 
+/*************************************主机->本机 通讯协议配置更新相关函数*******************************************/
+
+/**
+ * @brief STEP1.定义更新通讯协议的钩子
+ *
+ */
+typedef uint8_t (*update_protocol_config_fun_t)(
+    proto_data_proto_mode_config_t *protocol_config);
+
+/**
+ * @brief STEP2: 注册更新电通讯协议的钩子函数
+ *
+ * @param update_protocol_config_fun_t
+ * @return true
+ * @return false
+ */
+bool proto_register_update_potocol_config_fun(
+    update_protocol_config_fun_t *update_protocol_config_fun);
+
+/**
+ * @brief STEP3: 对外提供更通讯协议函数
+ *
+ * @param protocol_config
+ */
+void proto_update_potocol_mode_config(proto_data_proto_mode_config_t *protocol_config);
+
+/*************************************主机->本机 通讯协议配置更新相关函数*******************************************/
+
+
 
 /*************************************主机->本机 电机速度更新钩子函数*******************************************/
 
@@ -234,14 +263,14 @@ void proto_update_motor_speed(proto_motor_speed_ctrl_data_t *motor_speed);
 /*************************************主机->本机 WIFI配置更新相关函数*******************************************/
 
 /**
- * @brief STEP1.定义更新电机速度数据的钩子
+ * @brief STEP1.定义更新WIFI数据的钩子
  *
  */
 typedef uint8_t (*update_wifi_config_fun_t)(
     proto_data_wifi_config_t *motor_speed);
 
 /**
- * @brief STEP2: 注册更新电机速度数据的钩子函数
+ * @brief STEP2: 注册更新WIFI的钩子函数
  *
  * @param update_wifi_config_fun
  * @return true
@@ -251,11 +280,13 @@ bool proto_register_update_wifi_config_fun(
     update_wifi_config_fun_t *update_wifi_config_fun);
 
 /**
- * @brief STEP3: 对外提供更新电机目标速度函数
+ * @brief STEP3: 对外提供更新WIFI函数
  *
  * @param wifi_config
  */
 void proto_update_wifi_config(proto_data_wifi_config_t *wifi_config);
+/*************************************主机->本机 WIFI配置更新相关函数*******************************************/
+
 
 
 /*************************************本机->主机数据更新相关函数*******************************************/

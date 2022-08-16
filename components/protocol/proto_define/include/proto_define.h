@@ -14,8 +14,8 @@
 
 /******************************应用协议重命名***************************************/
 typedef proto_data_wifi_config_t fishbot_wifi_config_t;
-typedef proto_data_proto_mode_config_t fishbot_proto_config_t;
 typedef proto_data_pid_config_t fishbot_pid_config_t;
+typedef proto_data_proto_mode_config_t fishbot_proto_config_t;
 
 
 #endif // PROTO_DEFINE_H_
