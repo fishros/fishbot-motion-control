@@ -14,7 +14,7 @@ static protocol_package_t frame_pack_tx_;
 static protocol_package_t frame_pack_rx_;
 
 #define PORT 3474
-#define DEBUG_FISHBOT
+// #define DEBUG_FISHBOT
 
 typedef enum {
   UDP_CONNECT_STATUS_FALSE,

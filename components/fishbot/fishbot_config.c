@@ -85,7 +85,7 @@ fishbot_wifi_config_t wifi_config = {
 };
 
 fishbot_proto_config_t protocol_config = {
-    .mode = PROTO_MODE_UART,
+    .mode = PROTO_MODE_WIFI_UDP_SERVER,
     .ip = "192.168.0.103",
     .port = 3474,
     .bautrate = 115200,
@@ -127,17 +127,19 @@ uint8_t fishbot_update_wifi_config(fishbot_wifi_config_t *fishbot_wifi_config)
 uint8_t fishbot_update_proto_config(fishbot_proto_config_t *fishbot_proto_config)
 {
     // 将更新后的配置写入数据库
+    // ESP_LOGI(FISHBOT_MODLUE, "write proto mode=%d port=%d baudrate=%d ip=%s",
+    //          fishbot_proto_config->mode, fishbot_proto_config->port, fishbot_proto_config->bautrate, fishbot_proto_config->ip);
     nvs_write_struct(PROTO_COONFIG_NAME, fishbot_proto_config, sizeof(fishbot_proto_config_t));
     return true;
 }
-
-
 
 bool fishbot_config_init()
 {
     /*读取配置，若是初次上电则初始化数据库*/
     fishbot_first_startup_config_init();
-    
+    ESP_LOGI(FISHBOT_MODLUE, "proto mode=%d port=%d baudrate=%d ip=%s",
+             protocol_config.mode, protocol_config.port, protocol_config.bautrate, protocol_config.ip);
+
     set_wifi_config(&wifi_config);
     set_protocol_config(&protocol_config);
 
