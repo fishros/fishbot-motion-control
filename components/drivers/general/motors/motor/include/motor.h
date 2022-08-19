@@ -23,6 +23,9 @@
 #include "protocol.h"
 
 
+#define DRIVER_USE_DRV8833
+// #define DRIVER_USE_TB6612
+
 typedef struct
 {
     uint8_t motor_id;
