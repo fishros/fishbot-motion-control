@@ -9,6 +9,7 @@
 
 #define FISHBOT_MODLUE "MOTOR"
 
+#ifdef DRIVER_USE_TB6612
 #define UPDATE_OUTPUT(motor_id, output)                                     \
     if (output > 0)                                                         \
     {                                                                       \
@@ -27,6 +28,28 @@
         ledc_update_duty(LEDC_HIGH_SPEED_MODE, ledc_channel_map[motor_id]); \
     }
 
+#endif
+
+#ifdef DRIVER_USE_DRV8833
+
+#define UPDATE_OUTPUT(motor_id, output)                                                    \
+    if (output > 0)                                                                        \
+    {                                                                                      \
+        ledc_set_duty(LEDC_HIGH_SPEED_MODE, ledc_channel_map[2 * motor_id], (int)output);  \
+        ledc_update_duty(LEDC_HIGH_SPEED_MODE, ledc_channel_map[2 * motor_id]);            \
+        ledc_set_duty(LEDC_HIGH_SPEED_MODE, ledc_channel_map[2 * motor_id+1], 0);           \
+        ledc_update_duty(LEDC_HIGH_SPEED_MODE, ledc_channel_map[2 * motor_id+1]);            \
+    }                                                                                      \
+    else                                                                                   \
+    {                                                                                      \
+        ledc_set_duty(LEDC_HIGH_SPEED_MODE, ledc_channel_map[2 * motor_id], 0);           \
+        ledc_update_duty(LEDC_HIGH_SPEED_MODE, ledc_channel_map[2 * motor_id]);            \
+        ledc_set_duty(LEDC_HIGH_SPEED_MODE, ledc_channel_map[2*motor_id+1], -1 * (int)output); \
+        ledc_update_duty(LEDC_HIGH_SPEED_MODE, ledc_channel_map[2*motor_id+1]);                \
+    }
+
+#endif
+
 /*configs*/
 static uint8_t motor_num_ = 0;
 static pid_ctrl_config_t *pid_config_ = 0;
@@ -37,12 +60,11 @@ static uint8_t ledc_channel_map[] = {LEDC_CHANNEL_0, LEDC_CHANNEL_1,
 static pid_ctrl_block_handle_t
     pid_ctrl_block_handle_[MAX_MOTOR_NUM];               // PID控制结构体
 static rotary_encoder_t *rotary_encoder_[MAX_MOTOR_NUM]; // 编码器配置
-static int16_t target_speeds[MAX_MOTOR_NUM] = {0, 0}; // 电机当前速度，单位mm/s
+static int16_t target_speeds[MAX_MOTOR_NUM] = {0, 0};    // 电机当前速度，单位mm/s
 static uint16_t tick_to_mms[MAX_MOTOR_NUM] = {
     62.011394, 62.011394}; // 电机的编码器和距离换算出的值
 static proto_data_motor_encoder_t
     proto_motor_encoder_data_; // 上传存储的编码器数据
-
 
 bool set_motor_config(uint8_t motor_num, motor_config_t *motor_configs,
                       pid_ctrl_config_t *pid_configs)
@@ -96,7 +118,13 @@ bool motor_init(void)
         rotary_encoder_[i] =
             create_rotary_encoder(i, motor_config_[i].io_encoder_positive,
                                   motor_config_[i].io_encoder_negative);
+        // pid 配置初始化
+        pid_new_control_block(pid_config_ + i, pid_ctrl_block_handle_ + i);
+    }
 
+#ifdef DRIVER_USE_TB6612
+    for (i = 0; i < motor_num_; i++)
+    {
         // 方向控制IO初始化
         io_conf.intr_type = GPIO_INTR_DISABLE;
         io_conf.mode = GPIO_MODE_OUTPUT;
@@ -118,9 +146,35 @@ bool motor_init(void)
             .timer_sel = LEDC_TIMER_0,
         };
         ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
-        // pid 配置初始化
-        pid_new_control_block(pid_config_ + i, pid_ctrl_block_handle_ + i);
     }
+#endif
+
+#ifdef DRIVER_USE_DRV8833
+    for (i = 0; i < motor_num_; i++)
+    {
+        // PWM通道1初始化
+        ledc_channel_config_t ledc_channel1 = {
+            .channel = ledc_channel_map[2 * i],
+            .duty = 0,
+            .gpio_num = motor_config_[i].io_positive,
+            .speed_mode = LEDC_HIGH_SPEED_MODE,
+            .hpoint = 0,
+            .timer_sel = LEDC_TIMER_0,
+        };
+        ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel1));
+        // PWM通道2初始化
+        ledc_channel_config_t ledc_channel2 = {
+            .channel = ledc_channel_map[2 * i + 1],
+            .duty = 0,
+            .gpio_num = motor_config_[i].io_negative,
+            .speed_mode = LEDC_HIGH_SPEED_MODE,
+            .hpoint = 0,
+            .timer_sel = LEDC_TIMER_0,
+        };
+        ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel2));
+    }
+#endif
+
     proto_set_motor_encoder_data(&proto_motor_encoder_data_);
     proto_register_update_motor_speed_fun(update_motor_spped_fun);
     ESP_LOGI(FISHBOT_MODLUE, "init success!");
