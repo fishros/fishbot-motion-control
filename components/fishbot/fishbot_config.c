@@ -78,9 +78,7 @@ static pid_ctrl_config_t pid_config[] = {
 };
 
 fishbot_wifi_config_t wifi_config = {
-    .ssid = "fishbot",
-    .password = "fishros.com",
-    .mode = WIFI_MODE_STA,
+    .ssid = "fishbot", .password = "fishros.com", .mode = WIFI_MODE_STA,
     // .mode = WIFI_MODE_AP,
 };
 
@@ -98,14 +96,18 @@ bool fishbot_first_startup_config_init()
     ESP_LOGI(FISHBOT_MODLUE, "config=%d", configured);
     if (configured == NVS_DATA_UINT8_NONE)
     {
-        nvs_write_struct(WIFI_MODE_COONFIG_NAME, &wifi_config, sizeof(fishbot_wifi_config_t));
-        nvs_write_struct(PROTO_COONFIG_NAME, &protocol_config, sizeof(fishbot_proto_config_t));
+        nvs_write_struct(WIFI_MODE_COONFIG_NAME, &wifi_config,
+                         sizeof(fishbot_wifi_config_t));
+        nvs_write_struct(PROTO_COONFIG_NAME, &protocol_config,
+                         sizeof(fishbot_proto_config_t));
         nvs_write_uint8("configured", 1);
     }
     else
     {
-        nvs_read_struct(WIFI_MODE_COONFIG_NAME, &wifi_config, sizeof(fishbot_wifi_config_t));
-        nvs_read_struct(PROTO_COONFIG_NAME, &protocol_config, sizeof(fishbot_proto_config_t));
+        nvs_read_struct(WIFI_MODE_COONFIG_NAME, &wifi_config,
+                        sizeof(fishbot_wifi_config_t));
+        nvs_read_struct(PROTO_COONFIG_NAME, &protocol_config,
+                        sizeof(fishbot_proto_config_t));
     }
     return true;
 }
@@ -120,16 +122,56 @@ uint8_t fishbot_update_motor_pid_param(fishbot_pid_config_t *proto_pid_data)
 uint8_t fishbot_update_wifi_config(fishbot_wifi_config_t *fishbot_wifi_config)
 {
     // 将更新后的配置写入数据库
-    nvs_write_struct(WIFI_MODE_COONFIG_NAME, fishbot_wifi_config, sizeof(fishbot_wifi_config_t));
+    nvs_write_struct(WIFI_MODE_COONFIG_NAME, fishbot_wifi_config,
+                     sizeof(fishbot_wifi_config_t));
     return true;
 }
 
-uint8_t fishbot_update_proto_config(fishbot_proto_config_t *fishbot_proto_config)
+uint8_t fishbot_update_proto_config(
+    fishbot_proto_config_t *fishbot_proto_config)
 {
     // 将更新后的配置写入数据库
-    // ESP_LOGI(FISHBOT_MODLUE, "write proto mode=%d port=%d baudrate=%d ip=%s",
-    //          fishbot_proto_config->mode, fishbot_proto_config->port, fishbot_proto_config->bautrate, fishbot_proto_config->ip);
-    nvs_write_struct(PROTO_COONFIG_NAME, fishbot_proto_config, sizeof(fishbot_proto_config_t));
+    ESP_LOGI(FISHBOT_MODLUE, "write1 proto mode=%d port=%d baudrate=%d ip=%s",
+             fishbot_proto_config->mode, fishbot_proto_config->port,
+             fishbot_proto_config->bautrate, fishbot_proto_config->ip);
+    if (fishbot_proto_config->mode == PROTO_MODE_UPDATE)
+    {
+        // 切换模式
+        if (protocol_config.mode == PROTO_MODE_UART)
+        {
+            protocol_config.mode = PROTO_MODE_WIFI_UDP_CLIENT;
+        }
+        else if (protocol_config.mode == PROTO_MODE_WIFI_UDP_CLIENT)
+        {
+            protocol_config.mode = PROTO_MODE_WIFI_UDP_SERVER;
+        }
+        else if (protocol_config.mode == PROTO_MODE_WIFI_UDP_SERVER)
+        {
+            protocol_config.mode = PROTO_MODE_UART;
+        }
+    }
+
+    if (fishbot_proto_config->port != 0)
+    {
+        protocol_config.port = fishbot_proto_config->port;
+    }
+
+    if (fishbot_proto_config->bautrate != 0)
+    {
+        protocol_config.bautrate = fishbot_proto_config->bautrate;
+    }
+
+    if (fishbot_proto_config->ip[0] != 0)
+    {
+        sprintf(protocol_config.ip, "%s", fishbot_proto_config->ip);
+    }
+
+    ESP_LOGI(FISHBOT_MODLUE, "write2 proto mode=%d port=%d baudrate=%d ip=%s",
+             protocol_config.mode, protocol_config.port,
+             protocol_config.bautrate, protocol_config.ip);
+
+    nvs_write_struct(PROTO_COONFIG_NAME, &protocol_config,
+                     sizeof(fishbot_proto_config_t));
     return true;
 }
 
@@ -138,7 +180,8 @@ bool fishbot_config_init()
     /*读取配置，若是初次上电则初始化数据库*/
     fishbot_first_startup_config_init();
     ESP_LOGI(FISHBOT_MODLUE, "proto mode=%d port=%d baudrate=%d ip=%s",
-             protocol_config.mode, protocol_config.port, protocol_config.bautrate, protocol_config.ip);
+             protocol_config.mode, protocol_config.port, protocol_config.bautrate,
+             protocol_config.ip);
 
     set_wifi_config(&wifi_config);
     set_protocol_config(&protocol_config);

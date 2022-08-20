@@ -28,9 +28,15 @@
 docker run -it  --rm --privileged -v=/dev:/dev  -v `pwd`:`pwd` -w `pwd` espressif/idf:release-v4.4 idf.py build
 ```
 
+### 查看
+
+```
+docker run -it  --rm --privileged -v=/dev:/dev  -v `pwd`:`pwd` -w `pwd` espressif/idf:release-v4.4 idf.py monitor
+```
+
 ### 烧写
 ```
-docker run -it  --rm --privileged -v=/dev:/dev  -v `pwd`:`pwd` -w `pwd` espressif/idf:release-v4.4 idf.py flash
+docker run -it  --rm --privileged -v=/dev:/dev  -v `pwd`:`pwd` -w `pwd` espressif/idf:release-v4.4 idf.py flash monitor
 # Windows With Docker&WSL
 esptool.py -p /dev/ttyS12 -b 921600  --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 40m --flash_size 4MB 0x1000 bootloader/bootloader.bin 0x10000 main.bin 0x8000 partition_table/partition-table.bin
 ```
@@ -41,6 +47,22 @@ docker run -it --rm --privileged -v=/dev:/dev  -v `pwd`:`pwd` -w `pwd` fishros2/
 ```
 
 ## 工程介绍
+
+```mermaid
+graph TD;
+protocol-->key
+protocol-->motor
+protocol-->oled
+protocol-->imu
+protocol-->wifi
+key-->fishbot
+motor-->fishbot
+oled-->fishbot
+imu-->fishbot
+wifi-->fishbot
+```
+
+
 
 ### 嵌入式驱动结构
 

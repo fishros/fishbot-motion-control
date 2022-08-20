@@ -148,18 +148,18 @@ bool protocol_init()
   /* 根据模式配置不同通信任务 */
   if (protocol_config_->mode == PROTO_MODE_UART)
   {
-    uart_protocol_init(&data_rx_queue_, &data_tx_queue_);
+    // uart_protocol_init(&data_rx_queue_, &data_tx_queue_);
     udp_server_protocol_init(&data_rx_queue_, &data_tx_queue_);
   }
   else if (protocol_config_->mode == PROTO_MODE_WIFI_UDP_CLIENT)
   {
     udp_client_protocol_init(&data_rx_queue_, &data_tx_queue_);
-    uart_protocol_init(&data_rx_queue_, &data_tx_queue_);
+    // uart_protocol_init(&data_rx_queue_, &data_tx_queue_);
   }
   else if (protocol_config_->mode == PROTO_MODE_WIFI_UDP_SERVER)
   {
     udp_server_protocol_init(&data_rx_queue_, &data_tx_queue_);
-    uart_protocol_init(&data_rx_queue_, &data_tx_queue_);
+    // uart_protocol_init(&data_rx_queue_, &data_tx_queue_);
   }
 
   return true;
@@ -170,18 +170,18 @@ bool protocol_task_init(void)
   // 根据模式启动不同通信任务
   if (protocol_config_->mode == PROTO_MODE_UART)
   {
-    uart_protocol_task_init();
+    // uart_protocol_task_init();
     udp_server_protocol_recv_task_init();
   }
   else if (protocol_config_->mode == PROTO_MODE_WIFI_UDP_CLIENT)
   {
     udp_client_protocol_task_init();
-    uart_protocol_recv_task_init();
+    // uart_protocol_recv_task_init();
   }
   else if (protocol_config_->mode == PROTO_MODE_WIFI_UDP_SERVER)
   {
     udp_server_protocol_task_init();
-    uart_protocol_recv_task_init();
+    // uart_protocol_recv_task_init();
   }
   // 启动数据帧收发任务
   xTaskCreate(proto_upload_data_task, "proto_upload_data_task", 1024 * 2, NULL,

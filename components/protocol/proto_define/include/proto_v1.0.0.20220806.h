@@ -167,6 +167,7 @@ typedef struct
  */
 typedef enum
 {
+  PROTO_MODE_UPDATE = 0x00,
   PROTO_MODE_UART = 0x01,
   PROTO_MODE_WIFI_UDP_CLIENT,
   PROTO_MODE_WIFI_UDP_SERVER,
