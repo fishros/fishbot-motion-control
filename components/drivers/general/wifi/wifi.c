@@ -224,15 +224,15 @@ wifi_status_t get_wifi_ip(char *ip_address)
 {
     if (wifi_status_ == WIFI_STATUS_AP_READY)
     {
-        sprintf(ip_address, "192.168.4.1");
+        sprintf(ip_address, "HOST:192.168.4.1");
     }
     else if (wifi_status_ == WIFI_STATUS_STA_CONNECTED)
     {
-        sprintf(ip_address, "%s", wifi_ip_);
+        sprintf(ip_address, "HOST:%s", wifi_ip_);
     }
     else if (wifi_status_ == WIFI_STATUS_STA_DISCONECTED)
     {
-        sprintf(ip_address, "lost_connect");
+        sprintf(ip_address, "HOST:lost_connect");
     }
     return wifi_status_;
 }

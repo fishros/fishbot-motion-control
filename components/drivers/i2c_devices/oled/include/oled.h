@@ -74,4 +74,13 @@ bool oled_show_ascii_auto_line(char *str);
  */
 void oled_ascii(uint8_t x, uint8_t y, char *str);
 
+/**
+ * @brief 写ASSIC8字符
+ *
+ * @param x
+ * @param y
+ * @param str
+ */
+void oled_ascii8(uint8_t x, uint8_t y, char *str);
+
 #endif

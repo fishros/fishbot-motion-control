@@ -56,10 +56,10 @@ bool fishbot_init_hardware(void)
         return false;
     if (!protocol_init())
         return false;
-    char host[16];
+    char host[22];
     if (get_wifi_ip(host) != WIFI_STATUS_STA_DISCONECTED)
     {
-        oled_show_ascii_auto_line(" WIFI SUCCESS ");
+        oled_show_ascii_auto_line("STAT:WIFI OK");
         oled_show_ascii_auto_line(host);
     }
     return true;
