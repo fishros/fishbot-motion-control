@@ -78,7 +78,9 @@ static pid_ctrl_config_t pid_config[] = {
 };
 
 fishbot_wifi_config_t wifi_config = {
-    .ssid = "fishbot", .password = "fishros.com", .mode = WIFI_MODE_STA,
+    .ssid = "fishbot",
+    .password = "fishros.com",
+    .mode = WIFI_MODE_STA,
     // .mode = WIFI_MODE_AP,
 };
 
@@ -211,4 +213,22 @@ const char *fishbot_config_get_driver_version(void)
 const char *fishbot_config_get_hardware_version()
 {
     return fishbot_config.hardware_version;
+}
+
+static char proto_mode_[21];
+const char *fishbot_config_get_proto_mode_str()
+{
+    if (protocol_config.mode == PROTO_MODE_UART)
+    {
+        sprintf(proto_mode_, "%s", "MODE:UART");
+    }
+    else if (protocol_config.mode == PROTO_MODE_WIFI_UDP_CLIENT)
+    {
+        sprintf(proto_mode_, "%s", "MODE:UDP_CLIENT");
+    }
+    else if (protocol_config.mode == PROTO_MODE_WIFI_UDP_SERVER)
+    {
+        sprintf(proto_mode_, "%s", "MODE:UDP_SERVER");
+    }
+    return proto_mode_;
 }

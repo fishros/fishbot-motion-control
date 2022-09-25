@@ -11,8 +11,8 @@
  */
 #include "uart_protocol.h"
 
-#define UART_USB_NUM UART_NUM_1
-#define UART_LOG_NUM UART_NUM_0
+#define UART_USB_NUM UART_NUM_0
+#define UART_LOG_NUM UART_NUM_1
 
 #define UART_PROTOC_NUM UART_USB_NUM
 

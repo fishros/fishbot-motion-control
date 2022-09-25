@@ -8,7 +8,7 @@
 #include "oled.h"
 
 #define FISHBOT_MODLUE "OLED"
-#define OLED_MAX_LINES 3
+#define OLED_MAX_LINES 10
 #define OLED_START_LINE 1
 
 static uint8_t last_line_ = 2;

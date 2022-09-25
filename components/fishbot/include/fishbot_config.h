@@ -80,6 +80,7 @@ const char *fishbot_config_get_driver_version();
  */
 const char *fishbot_config_get_hardware_version();
 
+const char *fishbot_config_get_proto_mode_str();
 // update motor pid config
 // update motor scale config
 // update wifi config
